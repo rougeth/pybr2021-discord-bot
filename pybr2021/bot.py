@@ -132,7 +132,7 @@ async def config_channels(ctx: commands.Context):
         position=1,
     )
     await get_or_create_channel(
-        "america-latine-es", ctx.guild, position=0, category=voluntariado_cat
+        "america-latina-es", ctx.guild, position=0, category=voluntariado_cat
     )
     await get_or_create_channel(
         "pt-es-enquete-encuesta", ctx.guild, position=1, category=voluntariado_cat
