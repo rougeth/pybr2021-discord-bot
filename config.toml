@@ -1,0 +1,48 @@
+# Use essa categoria para criar canais sem categorias !!
+[[categories]]
+name = "default"
+position = 0
+
+# Canais de texto
+[[categories.channels]]
+name = "boas-vindas"
+position = 0
+
+#Categoria Organização
+[[categories]]
+name = "Organização"
+position = 0
+restict_access = true
+
+# Canais da Organização
+[[categories.channels]]
+name = "geral"
+position = 0
+
+# Canais de texto
+[[categories.channels]]
+name = "dev-null"
+position = 1
+
+# Canais de Voz
+[[categories.channels]]
+name = "Reuniões"
+position = 2
+voice = true
+
+# Categoria Voluntário
+[[categories]]
+name = "Voluntariado"
+position = 0
+restict_access = true
+
+[[categories.channels]]
+name = "america-latine-es"
+position = 0
+
+[[categories.channels]]
+name = "pt-es-enquete-encuestal"
+position = 1
+
+[[roles]]
+#TODO

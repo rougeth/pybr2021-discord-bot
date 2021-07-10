@@ -2,17 +2,22 @@ import asyncio
 import os
 from typing import Dict
 
-
 import discord
+import toml
 from decouple import config
+from discord import channel, message
 from discord.ext import commands
+from discord.ext.commands.errors import BadColourArgument
 from loguru import logger
 
+import bot_msg
 from discord_setup import get_or_create_channel, get_or_create_role
 
 DISCORD_TOKEN = config("DISCORD_TOKEN")
 
 bot = commands.Bot(command_prefix="pybr!", intents=discord.Intents.all())
+
+config_file = toml.load("./config.toml")
 
 
 @bot.group(name="config", invoke_without_command=True)
@@ -28,22 +33,16 @@ async def config_group(ctx, *args):
 async def config_roles(ctx: commands.Context):
     logger.info("Configurando roles")
     tracking_message = await ctx.channel.send(
-        "1️⃣ Conferindo *roles* existentes\n"
-        "2️⃣ Criando novos *roles*\n"
-        "3️⃣ Configurando permissões\n"
+        bot_msg.roles.format(bot_msg.emo01, bot_msg.emo02, bot_msg.emo03)
     )
     roles = await ctx.guild.fetch_roles()
     roles = {role.name: role for role in roles}
     logger.info(f"{len(roles)} roles encontrados. roles={','.join(roles.keys())!r}")
     await tracking_message.edit(
-        content=(
-            "✅ Conferindo roles já existem\n"
-            "2️⃣ Criando novos *roles*\n"
-            "3️⃣ Configurando permissões\n"
-        )
+        content=(bot_msg.roles.format(bot_msg.emo_check, bot_msg.emo02, bot_msg.emo03))
     )
 
-    # Novos roles
+    # Organization Roles
     org_permissions = discord.Permissions.all()
     org_permissions.administrator = False
 
@@ -52,14 +51,13 @@ async def config_roles(ctx: commands.Context):
         ("Organização", org_permissions, 80),
         ("Voluntariado", None, 70),
     ]
+
     for name, permissions, _ in new_roles:
         roles[name] = await get_or_create_role(name, ctx.guild, permissions=permissions)
 
     await tracking_message.edit(
         content=(
-            "✅ Conferindo roles já existem\n"
-            "✅ Criando novos *roles*\n"
-            "3️⃣ Configurando permissões\n"
+            bot_msg.roles.format(bot_msg.emo_check, bot_msg.emo_check, bot_msg.emo03)
         )
     )
 
@@ -70,11 +68,87 @@ async def config_roles(ctx: commands.Context):
 
     await tracking_message.edit(
         content=(
-            "✅ Conferindo roles já existem\n"
-            "✅ Criando novos *roles*\n"
-            "✅ Configurando permissões\n"
+            bot_msg.roles.format(
+                bot_msg.emo_check, bot_msg.emo_check, bot_msg.emo_check
+            )
         )
     )
+
+
+@config_group.command(name="canais_toml")
+async def config_channels2(ctx: commands.Context):
+
+    track_message = await ctx.channel.send(
+        """{} Criando Categorias e Canais""".format("⌛")
+    )
+
+    # Load categories and channels from config
+    for categorie in config_file.get("categories"):
+        cat_name = categorie.get("name")
+        cat_pos = categorie.get("position")
+        restict_access = categorie.get("restict_access", False)
+
+        track_message_cat = await ctx.channel.send(
+            """{}----Categoria {}""".format("⌛", cat_name)
+        )
+
+        if cat_name != "default":
+            overwrites = (
+                {
+                    ctx.guild.default_role: discord.PermissionOverwrite(
+                        read_messages=False
+                    ),
+                }
+                if restict_access
+                else None
+            )
+            # Create Category
+            discord_cat = await get_or_create_channel(
+                cat_name,
+                ctx.guild,
+                type=discord.ChannelType.category,
+                overwrites=overwrites,
+                position=cat_pos,
+            )
+
+        for channel in categorie.get("channels"):
+
+            channel_name = channel.get("name")
+            channel_pos = channel.get("position")
+            channel_voice = channel.get("voice", False)
+
+            track_message_channel = await ctx.channel.send(
+                """{}|--------Canal {}""".format("⌛", channel_name)
+            )
+
+            if channel_voice:
+                await get_or_create_channel(
+                    channel_name,
+                    ctx.guild,
+                    type=discord.ChannelType.voice,
+                    position=channel_pos,
+                    category=discord_cat,
+                )
+            else:
+                if cat_name == "default":
+                    await get_or_create_channel("boas-vindas", ctx.guild)
+                else:
+                    await get_or_create_channel(
+                        channel_name,
+                        ctx.guild,
+                        position=channel_pos,
+                        category=discord_cat,
+                    )
+
+            await track_message_channel.edit(
+                content=("""{}|--------Canal {}""".format("✅", channel_name))
+            )
+
+        await track_message_cat.edit(
+            content=("""{}----Categoria {}""".format("✅", cat_name))
+        )
+
+    await track_message.edit(content=("""{} Criando Categorias e Canais""".format("✅")))
 
 
 @config_group.command(name="canais")
@@ -98,6 +172,7 @@ async def config_channels(ctx: commands.Context):
     overwrites = {
         ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
     }
+
     organizacao_cat = await get_or_create_channel(
         "Organização",
         ctx.guild,
