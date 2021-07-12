@@ -7,7 +7,6 @@ import toml
 from decouple import config
 from discord import channel, message
 from discord.ext import commands
-from discord.ext.commands.errors import BadColourArgument
 from loguru import logger
 
 import bot_msg
@@ -86,7 +85,7 @@ async def config_channels2(ctx: commands.Context):
     for categorie in config_file.get("categories"):
         cat_name = categorie.get("name")
         cat_pos = categorie.get("position")
-        restict_access = categorie.get("restict_access", False)
+        restrict_access = categorie.get("restict_access", False)
 
         track_message_cat = await ctx.channel.send(
             """{}----Categoria {}""".format("⌛", cat_name)
@@ -99,9 +98,10 @@ async def config_channels2(ctx: commands.Context):
                         read_messages=False
                     ),
                 }
-                if restict_access
+                if restrict_access
                 else None
             )
+
             # Create Category
             discord_cat = await get_or_create_channel(
                 cat_name,
@@ -115,30 +115,24 @@ async def config_channels2(ctx: commands.Context):
 
             channel_name = channel.get("name")
             channel_pos = channel.get("position")
-            channel_voice = channel.get("voice", False)
 
             track_message_channel = await ctx.channel.send(
                 """{}|--------Canal {}""".format("⌛", channel_name)
             )
 
-            if channel_voice:
-                await get_or_create_channel(
-                    channel_name,
-                    ctx.guild,
-                    type=discord.ChannelType.voice,
-                    position=channel_pos,
-                    category=discord_cat,
-                )
-            else:
-                if cat_name == "default":
-                    await get_or_create_channel("boas-vindas", ctx.guild)
-                else:
-                    await get_or_create_channel(
-                        channel_name,
-                        ctx.guild,
-                        position=channel_pos,
-                        category=discord_cat,
-                    )
+            channel_param = {
+                "name": channel_name,
+                "guild": ctx.guild,
+                "type": discord.ChannelType.voice
+                if channel.get("voice", False)
+                else discord.ChannelType.text,
+                "position": channel_pos,
+            }
+
+            if cat_name != "default":
+                channel_param["category"] = discord_cat
+
+            await get_or_create_channel(**channel_param)
 
             await track_message_channel.edit(
                 content=("""{}|--------Canal {}""".format("✅", channel_name))
