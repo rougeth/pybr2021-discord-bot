@@ -30,10 +30,10 @@ async def config_group(ctx, *args):
 
 @config_group.command()
 async def info(ctx: commands.Context):
-    ctx.channel.send(content=(
+    await ctx.channel.send(content=(
         f"Guild ID: `{ctx.guild.id}`\n"
         f"Channel ID: `{ctx.channel.id}`\n"
-    )
+    ))
 
 
 @config_group.command(name="roles")
