@@ -10,11 +10,13 @@ from discord.ext import commands
 from loguru import logger
 
 import bot_msg
+import cogs
 from discord_setup import get_or_create_channel, get_or_create_role
 
 DISCORD_TOKEN = config("DISCORD_TOKEN")
 
 bot = commands.Bot(command_prefix="pybr!", intents=discord.Intents.all())
+bot.add_cog(cogs.Reminders(bot))
 
 config_file = toml.load("./config.toml")
 
@@ -30,10 +32,9 @@ async def config_group(ctx, *args):
 
 @config_group.command()
 async def info(ctx: commands.Context):
-    await ctx.channel.send(content=(
-        f"Guild ID: `{ctx.guild.id}`\n"
-        f"Channel ID: `{ctx.channel.id}`\n"
-    ))
+    await ctx.channel.send(
+        content=(f"Guild ID: `{ctx.guild.id}`\nChannel ID: `{ctx.channel.id}`\n")
+    )
 
 
 @config_group.command(name="roles")
