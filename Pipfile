@@ -8,6 +8,7 @@ name = "pypi"
 python-decouple = "*"
 loguru = "*"
 toml = "*"
+httpx = "*"
 
 [dev-packages]
 black = "*"
