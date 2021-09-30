@@ -26,8 +26,7 @@ async def http_get_json(semaphore, client, url, params, retry=3):
             logger.exception()
             if retry > 0:
                 await asyncio.sleep(5)
-                return await http_get_json(semaphore, client, url, params, retry-1)
-
+                return await http_get_json(semaphore, client, url, params, retry - 1)
 
 
 async def load_attendees(updated_at: datetime = None):
@@ -41,14 +40,16 @@ async def load_attendees(updated_at: datetime = None):
         default_params["changed_since"] = updated_at
 
     url = "https://www.eventbriteapi.com/v3/events/169078058023/attendees/"
-    semaphore = asyncio.BoundedSemaphore(2)
+    semaphore = asyncio.BoundedSemaphore(5)
     async with httpx.AsyncClient() as client:
         response = await http_get_json(semaphore, client, url, default_params)
         if not updated_at:
-            logger.info("Attendees load initialized. attendees={attendees}, pages={pages}".format(
-                attendees=response["pagination"]["object_count"],
-                pages=response["pagination"]["page_count"],
-            ))
+            logger.info(
+                "Attendees load initialized. attendees={attendees}, pages={pages}".format(
+                    attendees=response["pagination"]["object_count"],
+                    pages=response["pagination"]["page_count"],
+                )
+            )
 
         attendees = []
         attendees.extend(response["attendees"])
@@ -60,12 +61,16 @@ async def load_attendees(updated_at: datetime = None):
             next_page = json.dumps({"page": page_number})
 
             params = default_params.copy()
-            params["continuation"] = b64encode(next_page.encode("utf-8")).decode('utf-8')
+            params["continuation"] = b64encode(next_page.encode("utf-8")).decode(
+                "utf-8"
+            )
             tasks.append(http_get_json(semaphore, client, url, params))
 
         if tasks:
             results = await asyncio.gather(*tasks)
-            logger.info(f"Result from querying Eventbrite API. total_results={len(results)}")
+            logger.info(
+                f"Result from querying Eventbrite API. total_results={len(results)}"
+            )
 
             attendees.extend(
                 [attendees for result in results for attendees in result["attendees"]]
@@ -74,26 +79,19 @@ async def load_attendees(updated_at: datetime = None):
     return attendees
 
 
-def create_email_index(attendees):
-    index = {}
-    for attendee in attendees:
-        profile = attendee["profile"]
-        index[profile["email"]] = profile
-    return index
-
-
-def create_order_index(attendees):
+def create_index(attendees):
     index = {}
     for attendee in attendees:
         profile = attendee["profile"]
         index[attendee["order_id"]] = profile
+        index[profile["email"]] = profile
     return index
 
 
 class Greetings(commands.Cog):
     CATEGORY_NAME = "Credenciamento"
     WELCOME_CHANNEL_NAME = "boas-vindas"
-    ATTENDEES_ROLE_NAME = "inscritos"
+    ATTENDEES_ROLE_NAME = "Participantes"
     ORG_ROLE_NAME = "organização"
 
     def __init__(self, bot):
@@ -102,8 +100,7 @@ class Greetings(commands.Cog):
         self._attendees_updated_at = None
         self._category = None
         self._welcome_channel = None
-        self.order_index = {}
-        self.email_index = {}
+        self.index = {}
         self.load_indexes.start()
 
     @tasks.loop(minutes=1)
@@ -115,8 +112,7 @@ class Greetings(commands.Cog):
         self._attendees.extend(new_attendees)
         self._attendees_updated_at = datetime.utcnow()
 
-        self.email_index = create_email_index(self._attendees)
-        self.order_index = create_order_index(self._attendees)
+        self.index = create_index(self._attendees)
 
     def default_permissions_overwrite(self, guild):
         return {
@@ -153,16 +149,6 @@ class Greetings(commands.Cog):
     ):
         await channel.send(auth_instructions.format(name=member.mention))
 
-    async def send_greetings_message(
-            self, guild: discord.Guild, member: discord.Member
-    ):
-
-        if not self._welcome_channel:
-            channels = await guild.fetch_channels()
-            self._welcome_channel = discord.utils(channels, name=self.WELCOME_CHANNEL_NAME)
-
-        await self._welcome_channel.send(auth_welcome.format(name=member.mention))
-
     async def create_user_auth_channel(
         self, member: discord.Member, category: discord.CategoryChannel
     ):
@@ -184,30 +170,48 @@ class Greetings(commands.Cog):
 
         await self.send_auth_instructions(channel, member)
 
-    @commands.command(name="confirmar")
-    async def auth(self, ctx: commands.Context, value: str):
-        logger.info(f"Authenticating user. user={ctx.author.name}, value={value}")
-        if not ctx.channel.category or ctx.channel.category.name != self.CATEGORY_NAME:
-            message = f"❌ Ops! Eu só consigo validar inscrições em canais na category {self.CATEGORY_NAME}"
-            await ctx.channel.send(content=message)
+    def should_handle_message(self, message: discord.Message):
+        channel = message.channel
+        author = message.author
+        checks = [
+            not author.bot,
+            len(author.roles) == 1 and author.roles[0].is_default(),
+            author.name == channel.name,
+            isinstance(channel, discord.TextChannel),
+            hasattr(channel, "category")
+            and channel.category.name == self.CATEGORY_NAME,
+        ]
+
+        return all(checks)
+
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message):
+        if not self.should_handle_message(message):
             return
+
+        logger.info(
+            f"Authenticating user. user={message.author.name}, content={message.content}"
+        )
 
         # TODO validar se usuário já está inscrito
 
-        profile = self.order_index.get(value) or self.email_index.get(value)
+        profile = self.index.get(message.content)
 
         if not profile:
-            role = await self.get_org_role(ctx.guild)
-            await ctx.channel.send(content=auth_order_not_found.format(role=role.mention))
+            role = await self.get_org_role(message.guild)
+            await message.channel.send(
+                content=auth_order_not_found.format(role=role.mention)
+            )
             return
 
-        member = await self.get_member(ctx.guild, ctx.channel.name)
+        member = await self.get_member(message.guild, message.channel.name)
         if not member:
-            logger.warning(f"Member no found. name={ctx.channel.name}")
-            await ctx.channel.send(content=auth_user_not_found.format(name=ctx.channel.name))
+            logger.warning(f"Member no found. name={message.channel.name}")
+            await message.channel.send(
+                content=auth_user_not_found.format(name=message.channel.name)
+            )
             return
 
-        role = await self.get_attendee_role(ctx.guild)
+        role = await self.get_attendee_role(message.guild)
         await member.add_roles(role)
-        await ctx.channel.delete()
-        #await self.send_greetings_message(ctx.guild, member)
+        await message.channel.delete()
