@@ -6,7 +6,7 @@ from decouple import config
 class Reminders(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.weekly_meeting_points.start()
+        # self.weekly_meeting_points.start()
 
     async def _send_reminder(self, reminder: str):
         guild_id = config("DISCORD_GUILD_ID")
@@ -28,7 +28,7 @@ class Reminders(commands.Cog):
         )
         await channel.send(content=message)
 
-    @tasks.loop(hours=96)
+    # @tasks.loop(hours=96)
     async def weekly_meeting_points(self):
         await self._send_reminder(
             "Comentar issue da próxima reunião com items que precisam ser discutidos"
