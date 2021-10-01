@@ -34,6 +34,6 @@ class Reminders(commands.Cog):
             "Comentar issue da próxima reunião com items que precisam ser discutidos"
         )
 
-    @weekly_meeting_points.before_loop
+    # @weekly_meeting_points.before_loop
     async def before_weekly_meeting_points(self):
         await self.bot.wait_until_ready()
