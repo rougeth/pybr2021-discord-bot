@@ -40,7 +40,7 @@ async def load_attendees(updated_at: datetime = None):
         default_params["changed_since"] = updated_at
 
     url = "https://www.eventbriteapi.com/v3/events/169078058023/attendees/"
-    semaphore = asyncio.BoundedSemaphore(5)
+    semaphore = asyncio.BoundedSemaphore(10)
     async with httpx.AsyncClient() as client:
         response = await http_get_json(semaphore, client, url, default_params)
         if not updated_at:
