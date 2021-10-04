@@ -123,7 +123,7 @@ class Greetings(commands.Cog):
 
     async def get_attendee_role(self, guild: discord.Guild) -> discord.Role:
         roles = await guild.fetch_roles()
-        return discord.utils.get(roles, name="inscritos")
+        return discord.utils.get(roles, name=self.ATTENDEES_ROLE_NAME)
 
     async def get_org_role(self, guild: discord.Guild) -> discord.Role:
         members = await guild.fetch_roles()
