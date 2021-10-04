@@ -9,6 +9,7 @@ python-decouple = "*"
 loguru = "*"
 toml = "*"
 httpx = "*"
+sentry-sdk = "*"
 
 [dev-packages]
 black = "*"

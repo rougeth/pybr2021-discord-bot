@@ -13,6 +13,11 @@ import bot_msg
 import cogs
 from discord_setup import get_or_create_channel, get_or_create_role
 
+SENTRY_TOKEN = config("SENTRY_TOKEN", default=None)
+if SENTRY_TOKEN:
+    import sentry_sdk
+    sentry_sdk.init(SENTRY_TOKEN, traces_sample_rate=1.0)
+
 DISCORD_TOKEN = config("DISCORD_TOKEN")
 
 bot = commands.Bot(command_prefix="pybr!", intents=discord.Intents.all())
