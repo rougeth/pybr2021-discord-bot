@@ -16,13 +16,26 @@ Olá {name}, tudo bem?
 
 Estamos muito felizes pela sua participação e esperamos que você tenha uma ótima experiência durante o evento.
 
-Para comerçarmos, precisamos apenas confirmar a sua inscrição. Para isso, basta nos informar o email que você usou para se inscrever no Eventbrite ou o número da sua inscrição.
-Essas duas informações estão no email de confirmação enviado pelo Eventbrite. Pesquise por `Confirmação da inscrição para Python Brasil 2021` no seu email ou acesse sua conta no Eventbrite.
+Para começarmos, precisamos confirmar a sua inscrição. **Para isso, basta nos enviar o email que você usou para se inscrever no Eventbrite ou o número da sua inscrição**.
 
-Com email usado em mãos, basta copiar e colar a mensagem nesse canal que eu me encarrego do resto.
+Essas duas informações estão no email de confirmação enviado pelo Eventbrite. Pesquise por Confirmação da inscrição para Python Brasil 2021 no seu email ou acesse sua conta no Eventbrite. Para funcionar direitinho, mande **apenas** o email ou os números da inscrição que eu me encarrego do resto.
 
-**Mas eu ainda não fiz a inscrição!**
 Se você ainda não fez sua inscrição para o evento, não tem problema, vá até o link abaixo, se cadastre e volte aqui quando tiver tudo pronto.
+https://www.eventbrite.com.br/e/python-brasil-2021-registration-169078058023
+
+---
+
+Hola {name}, ¿cómo estás?
+
+🎉 ¡Bienvenido a otra edición de Python Brasil! 🎉
+
+Estamos muy contentos de contar con tu participación y esperamos que tengas una grata experiencia durante este evento.
+
+Para comenzar, necesitaremos confirmar tu registro. **Para hacer esto, simplemente basta que nos envíes el correo electrónico que utilizaste para registrarse en Eventbrite o tu número de registro**.
+
+Estos dos datos se encuentran en el correo electrónico de confirmación enviado por Eventbrite. Busca la confirmación de inscripción de Python Brasil 2021 en tu correo electrónico o inicia sesión en tu cuenta de Eventbrite. Para que funcione correctamente, **solo envíanos** el correo electrónico o los números de registro y yo me ocuparé del resto.
+
+Si aún no te has registrado para el evento, no hay problema, utiliza el enlace debajo, regístrate y compárteme los datos aquí.
 https://www.eventbrite.com.br/e/python-brasil-2021-registration-169078058023
 """
 
