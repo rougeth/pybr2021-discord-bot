@@ -67,10 +67,6 @@ async def load_attendees(updated_at: datetime = None):
 
         if tasks:
             results = await asyncio.gather(*tasks)
-            logger.info(
-                f"Result from querying Eventbrite API. total_results={len(results)}"
-            )
-
             attendees.extend(
                 [attendees for result in results for attendees in result["attendees"]]
             )
@@ -105,9 +101,9 @@ class Greetings(commands.Cog):
     @tasks.loop(minutes=1)
     async def load_indexes(self):
         new_attendees = await load_attendees(self._attendees_updated_at)
-        if len(new_attendees) != len(self._attendees):
+        if len(new_attendees) != 0:
             logger.info(
-                f"New attendees found. before={len(self._attendees)}, after={len(new_attendees)}"
+                f"New attendees found. total={len(new_attendees)}"
             )
         self._attendees.extend(new_attendees)
         self._attendees_updated_at = datetime.utcnow()
@@ -166,11 +162,11 @@ class Greetings(commands.Cog):
             overwrites=overwrites,
         )
 
-    @commands.command()
-    async def check_order(self, ctx, value):
+    @commands.command(name="check-eventbrite")
+    async def check_eventbrite(self, ctx, value):
         profile = self.index.get(value)
         if profile:
-            message = f"`{value}` encotrado.\n{profile!r}"
+            message = f"`{value}` encotrado.\n```{profile!r}```"
         else:
             message = f"`{value}` não encotrado."
 
