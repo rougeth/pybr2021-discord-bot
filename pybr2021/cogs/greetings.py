@@ -92,7 +92,7 @@ class Greetings(commands.Cog):
     CATEGORY_NAME = "Credenciamento"
     WELCOME_CHANNEL_NAME = "boas-vindas"
     ATTENDEES_ROLE_NAME = "Participantes"
-    ORG_ROLE_NAME = "organização"
+    ORG_ROLE_NAME = "Organização"
 
     def __init__(self, bot):
         self.bot = bot
@@ -161,6 +161,16 @@ class Greetings(commands.Cog):
             category=category,
             overwrites=overwrites,
         )
+
+    @commands.command()
+    async def check_order(self, ctx, value):
+        profile = self.index.get(value)
+        if profile:
+            message = f"`{value}` encotrado.\n{profile!r}"
+        else:
+            message = f"`{value}` não encotrado."
+
+        await ctx.channel.send(message)
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):

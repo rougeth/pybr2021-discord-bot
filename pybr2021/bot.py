@@ -27,6 +27,12 @@ bot.add_cog(cogs.Greetings(bot))
 config_file = toml.load("./config.toml")
 
 
+@bot.event
+async def on_error(event, *args, **kwargs):
+    """Don't ignore the error, causing Sentry to capture it."""
+    raise
+
+
 @bot.group(name="config", invoke_without_command=True)
 async def config_group(ctx, *args):
     await ctx.channel.send(
