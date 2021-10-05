@@ -102,17 +102,17 @@ class Greetings(commands.Cog):
     async def load_indexes(self):
         new_attendees = await load_attendees(self._attendees_updated_at)
         if len(new_attendees) != 0:
-            logger.info(
-                f"New attendees found. total={len(new_attendees)}"
-            )
+            logger.info(f"New attendees found. total={len(new_attendees)}")
         self._attendees.extend(new_attendees)
         self._attendees_updated_at = datetime.utcnow()
 
         self.index = create_index(self._attendees)
-        logger.info("Attendees index updated. total={}, updated_at={}".format(
-            len(self._attendees),
-            self._attendees_updated_at,
-        ))
+        logger.info(
+            "Attendees index updated. total={}, updated_at={}".format(
+                len(self._attendees),
+                self._attendees_updated_at,
+            )
+        )
 
     def default_permissions_overwrite(self, guild):
         return {
@@ -185,12 +185,16 @@ class Greetings(commands.Cog):
         author = message.author
         checks = [
             not author.bot,
-            isinstance(author, discord.Member),
-            len(author.roles) == 1 and author.roles[0].is_default(),
-            isinstance(channel, discord.TextChannel),
-            author.name == channel.name,
-            hasattr(channel, "category")
-            and channel.category.name == self.CATEGORY_NAME,
+            (channel.type == discord.ChannelType.text and channel.name == author.name),
+            (
+                hasattr(author, "roles")
+                and len(author.roles) == 1
+                and author.roles[0].is_default()
+            ),
+            (
+                hasattr(channel, "category")
+                and channel.category.name == self.CATEGORY_NAME
+            ),
         ]
 
         return all(checks)
@@ -209,7 +213,9 @@ class Greetings(commands.Cog):
         profile = self.index.get(message.content)
 
         if not profile:
-            logger.info(f"User not found on index. user={message.author.name}, content={message.content!r}")
+            logger.info(
+                f"User not found on index. user={message.author.name}, content={message.content!r}"
+            )
             role = await self.get_org_role(message.guild)
             await message.channel.send(
                 content=auth_order_not_found.format(role=role.mention)
@@ -218,7 +224,9 @@ class Greetings(commands.Cog):
 
         member = await self.get_member(message.guild, message.channel.name)
         if not member:
-            logger.warning(f"User with channel's name not found on Discord. channel={message.channel.name}")
+            logger.warning(
+                f"User with channel's name not found on Discord. channel={message.channel.name}"
+            )
             await message.channel.send(
                 content=auth_user_not_found.format(name=message.channel.name)
             )
@@ -227,4 +235,6 @@ class Greetings(commands.Cog):
         role = await self.get_attendee_role(message.guild)
         await member.add_roles(role)
         await message.channel.delete()
-        logger.info(f"User authenticated and channel deleted. user={message.author.name}")
+        logger.info(
+            f"User authenticated and channel deleted. user={message.author.name}"
+        )
