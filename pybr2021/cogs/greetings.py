@@ -23,10 +23,10 @@ async def http_get_json(semaphore, client, url, params, retry=3):
             response = await client.get(url, params=params)
             return response.json()
         except httpx.ReadTimeout:
-            logger.exception()
             if retry > 0:
                 await asyncio.sleep(5)
                 return await http_get_json(semaphore, client, url, params, retry - 1)
+            logger.exception("Erro")
 
 
 async def load_attendees(updated_at: datetime = None):
@@ -126,12 +126,12 @@ class Greetings(commands.Cog):
         return discord.utils.get(roles, name=self.ATTENDEES_ROLE_NAME)
 
     async def get_org_role(self, guild: discord.Guild) -> discord.Role:
-        members = await guild.fetch_roles()
-        return discord.utils.get(members, name=self.ORG_ROLE_NAME)
+        roles = await guild.fetch_roles()
+        return discord.utils.get(roles, name=self.ORG_ROLE_NAME)
 
-    async def get_member(self, guild: discord.Guild, name: str) -> discord.Role:
+    async def get_member(self, guild: discord.Guild, id: int) -> discord.Role:
         members = await guild.fetch_members().flatten()
-        return discord.utils.get(members, name=name)
+        return discord.utils.find(lambda m: str(m.id) == id, members)
 
     async def get_category(self, guild: discord.Guild) -> discord.CategoryChannel:
         if not self._category:
@@ -156,7 +156,7 @@ class Greetings(commands.Cog):
         overwrites[member] = discord.PermissionOverwrite(read_messages=True)
 
         return await get_or_create_channel(
-            member.name,
+            str(member.id),
             member.guild,
             category=category,
             overwrites=overwrites,
@@ -184,7 +184,7 @@ class Greetings(commands.Cog):
         channel = message.channel
         author = message.author
         checks = [
-            (channel.type == discord.ChannelType.text and channel.name == author.name),
+            (channel.type == discord.ChannelType.text and channel.name == str(author.id)),
             (
                 not author.bot
                 and getattr(author, "roles", False)
@@ -196,7 +196,6 @@ class Greetings(commands.Cog):
                 and channel.category.name == self.CATEGORY_NAME
             ),
         ]
-
         return all(checks)
 
     @commands.Cog.listener()
@@ -205,16 +204,15 @@ class Greetings(commands.Cog):
             return
 
         logger.info(
-            f"Authenticating user. user={message.author.name}, content={message.content}"
+            f"Authenticating user. user={message.author.name}, id={message.author.id}, content={message.content}"
         )
 
         # TODO validar se usuário já está inscrito
 
         profile = self.index.get(message.content)
-
         if not profile:
             logger.info(
-                f"User not found on index. user={message.author.name}, content={message.content!r}"
+                f"User not found on index. user_id={message.author.id}, content={message.content!r}"
             )
             role = await self.get_org_role(message.guild)
             await message.channel.send(
@@ -228,7 +226,7 @@ class Greetings(commands.Cog):
                 f"User with channel's name not found on Discord. channel={message.channel.name}"
             )
             await message.channel.send(
-                content=auth_user_not_found.format(name=message.channel.name)
+                content=auth_user_not_found.format(id=message.channel.name)
             )
             return
 

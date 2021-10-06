@@ -45,6 +45,6 @@ De qualquer forma, vou marcar a {role} para ajudar.
 """
 
 auth_user_not_found = """
-Eita, não encontrei uma pessoa com nome **{name}** no Discord.
+Eita, não encontrei uma pessoa com id **{id}** no Discord.
 Marcando a @organização para ajudar.
 """
