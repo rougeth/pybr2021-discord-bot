@@ -187,12 +187,12 @@ class Greetings(commands.Cog):
             not author.bot,
             (channel.type == discord.ChannelType.text and channel.name == author.name),
             (
-                hasattr(author, "roles")
+                getattr(author, "roles")
                 and len(author.roles) == 1
                 and author.roles[0].is_default()
             ),
             (
-                hasattr(channel, "category")
+                getattr(channel, "category")
                 and channel.category.name == self.CATEGORY_NAME
             ),
         ]

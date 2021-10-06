@@ -1,5 +1,6 @@
 import asyncio
 import os
+import sys
 from typing import Dict
 
 import discord
@@ -11,11 +12,11 @@ from loguru import logger
 
 import bot_msg
 import cogs
+import sentry_sdk
 from discord_setup import get_or_create_channel, get_or_create_role
 
 SENTRY_TOKEN = config("SENTRY_TOKEN", default=None)
 if SENTRY_TOKEN:
-    import sentry_sdk
     sentry_sdk.init(SENTRY_TOKEN, traces_sample_rate=1.0)
 
 DISCORD_TOKEN = config("DISCORD_TOKEN")
@@ -30,7 +31,11 @@ config_file = toml.load("./config.toml")
 @bot.event
 async def on_error(event, *args, **kwargs):
     """Don't ignore the error, causing Sentry to capture it."""
-    raise
+    logger.exception("Exception while handling event. event={event!r}, args={args!r}, kwargs={kwargs!r}")
+    if SENTRY_TOKEN:
+        _, e, traceback = sys.exc_info()
+        sentry_sdk.capture_exception(e)
+        logger.info(f"Exception sent to Sentry. e={e!r}")
 
 
 @bot.group(name="config", invoke_without_command=True)
