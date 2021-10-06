@@ -180,19 +180,19 @@ class Greetings(commands.Cog):
 
         await self.send_auth_instructions(channel, member)
 
-    def should_handle_message(self, message: discord.Message):
+    def should_authenticate_user(self, message: discord.Message):
         channel = message.channel
         author = message.author
         checks = [
-            not author.bot,
             (channel.type == discord.ChannelType.text and channel.name == author.name),
             (
-                getattr(author, "roles")
+                not author.bot
+                and getattr(author, "roles", False)
                 and len(author.roles) == 1
                 and author.roles[0].is_default()
             ),
             (
-                getattr(channel, "category")
+                getattr(channel, "category", False)
                 and channel.category.name == self.CATEGORY_NAME
             ),
         ]
@@ -201,7 +201,7 @@ class Greetings(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        if not self.should_handle_message(message):
+        if not self.should_authenticate_user(message):
             return
 
         logger.info(
