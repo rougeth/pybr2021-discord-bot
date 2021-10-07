@@ -13,7 +13,7 @@ auth_instructions = """
 (pt-br)
 Olá {name}, 
 
-:warning: Para ter acesso ao conteúdo desse servidor, nos envia aquí o **e-mail que você se inscreveu no EventBrite** OU o **número da sua inscrição** sem nenhum texto adicionar, por exemplo:
+:warning: Para ter acesso ao conteúdo da Python Brasil, nos envia aquí o **e-mail que você se inscreveu no EventBrite** OU o **número da sua inscrição** sem nenhum texto adicionar, por exemplo:
 
 fulaninha@python.org.br 
 
