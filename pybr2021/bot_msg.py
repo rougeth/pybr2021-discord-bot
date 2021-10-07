@@ -10,41 +10,54 @@ roles = """
 """
 
 auth_instructions = """
-Olá {name}, tudo bem?
+(pt-br)
+Olá {name}, 
 
-🎉 Boas vindas a mais uma edição da **Python Brasil**! 🎉
+Este servidor é exclusivo para participantes da Python Brasil 2021. Por isso, precisamos confirmar a sua inscrição. 
 
-Estamos muito felizes pela sua participação e esperamos que você tenha uma ótima experiência durante o evento.
+:warning: Nos envia o **e-mail que você se inscreveu no EventBrite** OU o **número da sua inscrição** sem nenhum texto adicionar, por exemplo:
 
-Para começarmos, precisamos confirmar a sua inscrição. **Para isso, basta nos enviar o email que você usou para se inscrever no Eventbrite ou o número da sua inscrição**.
+fulaninha@python.org.br
 
-Essas duas informações estão no email de confirmação enviado pelo Eventbrite. Pesquise por Confirmação da inscrição para Python Brasil 2021 no seu email ou acesse sua conta no Eventbrite. Para funcionar direitinho, mande **apenas** o email ou os números da inscrição que eu me encarrego do resto.
+Essas duas informações estão no email de confirmação enviado pelo Eventbrite. Pesquise por `Confirmação da inscrição para Python Brasil 2021` no seu email ou acesse sua conta no Eventbrite.
 
 Se você ainda não fez sua inscrição para o evento, não tem problema, vá até o link abaixo, se cadastre e volte aqui quando tiver tudo pronto.
 <https://www.eventbrite.com.br/e/python-brasil-2021-registration-169078058023>
 
 ---
+(es)
+Hola {name}, 
 
-Hola {name}, ¿cómo estás?
+Este servidor es exclusivo para asistentes de la Python Brasil 2021. Por lo tanto, necesitamos confirmar tu inscripción.
 
-🎉 ¡Bienvenido a otra edición de Python Brasil! 🎉
+:warning: Colga el **correo que ocupaste en el EventBrite** O el **número de tu inscripción** sin texto adicional, por ejemplo:
 
-Estamos muy contentos de contar con tu participación y esperamos que tengas una grata experiencia durante este evento.
+guay@python.org.br
 
-Para comenzar, necesitaremos confirmar tu registro. **Para hacer esto, simplemente basta que nos envíes el correo electrónico que utilizaste para registrarse en Eventbrite o tu número de registro**.
-
-Estos dos datos se encuentran en el correo electrónico de confirmación enviado por Eventbrite. Busca la confirmación de inscripción de Python Brasil 2021 en tu correo electrónico o inicia sesión en tu cuenta de Eventbrite. Para que funcione correctamente, **solo envíanos** el correo electrónico o los números de registro y yo me ocuparé del resto.
+Estos dos datos se encuentran en el correo electrónico de confirmación enviado por Eventbrite. Busca la confirmación de inscripción de Python Brasil 2021 en tu correo electrónico o inicia sesión en tu cuenta de Eventbrite. 
 
 Si aún no te has registrado para el evento, no hay problema, utiliza el enlace debajo, regístrate y compárteme los datos aquí.
 <https://www.eventbrite.com.br/e/python-brasil-2021-registration-169078058023>
 """
 
 auth_order_not_found = """
-Uhmm, não encontrei a sua inscrição. Quer tentar de novo? Pode ser tanto o e-mail usado no cadastro ou o número de registro.
+(pt-br)
+Uhmm, não encontrei a sua inscrição. Quer tentar de novo? Pode ser tanto o e-mail usado no cadastro ou o **número de registro**.
 De qualquer forma, vou marcar a {role} para ajudar.
+
+--
+(es)
+Uhum, no encontré tu inscripción. Podrías intentarlo de nuevo? Ponga el **correo** usado en la inscripción o el **número de la inscripción**.
+De todos modos, llamaré la {role} para ayudarte.
 """
 
 auth_user_not_found = """
+(pt-br)
 Eita, não encontrei uma pessoa com id **{id}** no Discord.
 Marcando a @organização para ajudar.
+
+--
+(es)
+Ops, no encontré una persona con el id **{id}** en el Discord.
+Llamo la @organização para ayudarte.
 """
