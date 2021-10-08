@@ -152,8 +152,10 @@ class Greetings(commands.Cog):
     async def create_user_auth_channel(
         self, member: discord.Member, category: discord.CategoryChannel
     ):
+        org_role = await self.get_org_role(member.guild)
         overwrites = self.default_permissions_overwrite(member.guild)
         overwrites[member] = discord.PermissionOverwrite(read_messages=True)
+        overwrites[org_role] = discord.PermissionOverwrite(read_messages=True)
 
         return await get_or_create_channel(
             str(member.id),
