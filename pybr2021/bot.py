@@ -38,6 +38,14 @@ async def on_error(event, *args, **kwargs):
         logger.info(f"Exception sent to Sentry. e={e!r}")
 
 
+@bot.event
+async def on_message(message):
+    if not message.author.bot and message.content.lower() == "galvão?":
+        await message.channel.send("Fala Tino!")
+
+    await bot.process_commands(message)
+
+
 @bot.group(name="config", invoke_without_command=True)
 async def config_group(ctx, *args):
     await ctx.channel.send(
