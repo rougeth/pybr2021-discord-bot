@@ -21,7 +21,7 @@ DISCORD_GUILD_ID = config("DISCORD_GUILD_ID")
 ROLE_INVITE_MAP = [
     ("Ministrantes", ["zuNYMG4jud"]),
     ("Voluntariado", ["j9YH9BqU"]),
-    ("Patrocinadoras", ["z67qAJQq"]),
+    ("Patrocinadoras", ["DfgQhYnVxK"]),
 ]
 
 
