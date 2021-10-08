@@ -4,6 +4,7 @@ import sys
 from typing import Dict
 
 import discord
+import sentry_sdk
 import toml
 from decouple import config
 from discord import channel, message
@@ -12,7 +13,6 @@ from loguru import logger
 
 import bot_msg
 import cogs
-import sentry_sdk
 from discord_setup import get_or_create_channel, get_or_create_role
 
 SENTRY_TOKEN = config("SENTRY_TOKEN", default=None)
@@ -238,6 +238,36 @@ async def config_channels(ctx: commands.Context):
     )
 
 
+
+@bot.command(name="send-message")
+async def sendmsg(ctx, *args):
+    if len(args) < 2:
+        logger.warning("missing destination message and message")
+        return
+
+    if args[0].startswith("<#"):
+        channel_id = int(args[0][2:-1])
+        destination = discord.utils.get(ctx.guild.channels, id=channel_id)
+    elif args[0].startswith("<@"):
+        member_id = int(args[0][2:-1])
+        destination = discord.utils.get(ctx.guild.members, id=member_id)
+    else:
+        logger.warning(f"Not a channel or user. args={args}")
+        await ctx.channel.send(
+            f"Uhmm, não encontrei o canal/membro **{args[0]}** para enviar a mensagem"
+        )
+        return
+
+    if not destination:
+        logger.warning(
+            f"Destination not found. destination={destination!r}, args={args!r}"
+        )
+        return
+
+    message = " ".join(args[1:])
+    logger.info(f"message sent. destination={destination}, message={message}")
+    await destination.send(message)
+        
 async def reset(guild: discord.Guild):
     channels = await guild.fetch_channels()
     await asyncio.gather(*[channel.delete() for channel in channels])
