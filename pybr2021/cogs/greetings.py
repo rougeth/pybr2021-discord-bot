@@ -12,9 +12,17 @@ from decouple import config
 
 from discord_setup import get_or_create_channel
 from bot_msg import auth_instructions, auth_user_not_found, auth_order_not_found
+from invite_tracker import InviteTracker
 
 
 EVENTBRITE_TOKEN = config("EVENTBRITE_TOKEN")
+DISCORD_GUILD_ID = config("DISCORD_GUILD_ID")
+
+ROLE_INVITE_MAP = [
+    ("Ministrantes", ["zuNYMG4jud"]),
+    ("Voluntariado", ["j9YH9BqU"]),
+    ("Patrocinadoras", ["z67qAJQq"]),
+]
 
 
 async def http_get_json(semaphore, client, url, params, retry=3):
@@ -175,7 +183,18 @@ class Greetings(commands.Cog):
         await ctx.channel.send(message)
 
     @commands.Cog.listener()
+    async def on_ready(self):
+        self.guild = await self.bot.fetch_guild(DISCORD_GUILD_ID)
+        self.invite_tracker = InviteTracker(self.bot, self.guild, ROLE_INVITE_MAP)
+        await self.invite_tracker.sync()
+        logger.info(f"Invite tracker synced. invites={self.invite_tracker.invites!r}")
+
+    @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
+        joined_with_invite_code = await self.invite_tracker.check_new_user(member)
+        if joined_with_invite_code:
+            return
+
         guild = member.guild
         category = await self.get_category(member.guild)
         channel = await self.create_user_auth_channel(member, category)
