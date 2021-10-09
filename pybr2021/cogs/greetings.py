@@ -151,7 +151,7 @@ class Greetings(commands.Cog):
                     logger.info(f"Third innativite warning {channel.name}")
                     messages.append(
                         channel.send(
-                            f"<@{channel.name}>, este é um último aviso para validar seu cadastro, caso não o faça seu usuário será removido do servidor.Caso isso ocorra, você poderá voltar e se cadastra corretamente pelo mesmo link já enviado por email"
+                            f"<@{channel.name}>, se você não conseguir confirmar sua inscrição, nós precisaremos remover esse canal para liberar espaço para outras pessoas. Caso isso aconteça, você poderá entrar novamente usando o mesmo link que enviamos por email. Marcando a {role.mention} para ajudarem."
                         )
                     )
                 elif channel_diff >= SECOND_WARNING_MIN:
