@@ -158,7 +158,7 @@ class Greetings(commands.Cog):
                     logger.info(f"Second innativite warning {channel.name}")
                     messages.append(
                         channel.send(
-                            f"<@{channel.name}>, estou avisando a {role.mention} para vir aqui te ajudar !"
+                            f"<@{channel.name}>, estou avisando a {role.mention} para vir aqui te ajudar!"
                         )
                     )
                 elif channel_diff >= FIRST_WARNING_MIN:
