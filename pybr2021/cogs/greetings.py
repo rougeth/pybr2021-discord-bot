@@ -130,7 +130,7 @@ class Greetings(commands.Cog):
         )
 
     @tasks.loop(minutes=INACTIVY_MINUTES_CHECK)
-    async def need_help(self):
+    async def check_inactivity(self):
         for guild in self.bot.guilds:
             category = await self.get_category(guild)
             now = datetime.utcnow()
