@@ -3,6 +3,7 @@ import json
 import time
 from base64 import b64encode
 from datetime import datetime, timedelta
+from functools import wraps
 from random import shuffle
 
 import discord
@@ -29,6 +30,16 @@ ROLE_INVITE_MAP = [
     ("Voluntariado", ["j9YH9BqU"]),
     ("Patrocinadoras", ["DfgQhYnVxK"]),
 ]
+
+
+def only_log_exceptions(function):
+    @wraps(function)
+    async def wrapper(*args, **kwargs):
+        try:
+            return await function(*args, **kwargs)
+        except:
+            logger.exception(f"Error while calling {f!r}")
+    return wrapper
 
 
 async def logchannel(bot, message):
@@ -122,6 +133,7 @@ class Greetings(commands.Cog):
         self.auth_users.start()
 
     @tasks.loop(minutes=1)
+    @only_log_exceptions
     async def load_indexes(self):
         new_attendees = await load_attendees(self._attendees_updated_at)
         if len(new_attendees) != 0:
@@ -138,6 +150,7 @@ class Greetings(commands.Cog):
         )
 
     @tasks.loop(minutes=INACTIVY_MINUTES_CHECK)
+    @only_log_exceptions
     async def check_inactivity(self):
         logger.info("Start check inactivity")
         for guild in self.bot.guilds:
@@ -158,6 +171,7 @@ class Greetings(commands.Cog):
         await self.bot.wait_until_ready()
 
     @tasks.loop(minutes=KICK_MIN)
+    @only_log_exceptions
     async def auth_users(self):
         guild = await self.get_guild()
         channels = await guild.fetch_channels()
