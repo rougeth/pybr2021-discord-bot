@@ -290,9 +290,10 @@ class Greetings(commands.Cog):
                 f"User not found on index. user_id={message.author.id}, content={message.content!r}"
             )
             role = await self.get_org_role(message.guild)
-            await message.channel.send(
-                content=auth_order_not_found.format(role=role.mention)
-            )
+            # TODO temporay remnoving
+            # await message.channel.send(
+            #     content=auth_order_not_found.format(role=role.mention)
+            # )
             return
 
         member = await self.get_member(message.guild, message.channel.name)
