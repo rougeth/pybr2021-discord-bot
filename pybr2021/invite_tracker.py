@@ -53,10 +53,7 @@ class InviteTracker:
         return diff
 
     async def check_new_user(self, member):
-        logger.info(f"Checking member role. member={member.display_name}")
-
         if not self.invite_codes:
-            logger.info("Fetching roles")
             self.invite_codes = await self.fetch_roles()
 
         await self.sync()
@@ -66,9 +63,6 @@ class InviteTracker:
             try:
                 new_role = discord.Object(self.invite_codes.get(code))
             except TypeError:
-                logger.error(
-                    f"Code not in tracked list, ignoring. code={code!r}, invite_codes={self.invite_codes!r}"
-                )
                 return None
 
             if new_role and uses == 1:
