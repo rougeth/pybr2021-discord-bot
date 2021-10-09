@@ -169,7 +169,7 @@ class Greetings(commands.Cog):
 
             await asyncio.gather(*messages)
 
-    @need_help.before_loop
+    @check_inactivity.before_loop
     async def before_sendmessage(self):
         await self.bot.wait_until_ready()
 
