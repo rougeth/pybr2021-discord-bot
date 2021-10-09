@@ -147,21 +147,21 @@ class Greetings(commands.Cog):
                         await guild.kick(kick_member)
                     logger.info(f"Removing user auth channel {channel.name}")
                     await channel.delete()
-                elif channel_diff >= THIRD_WARNING_MIN:
+                elif (THIRD_WARNING_MIN + INACTIVY_MINUTES_CHECK) > channel_diff >= THIRD_WARNING_MIN:
                     logger.info(f"Third innativite warning {channel.name}")
                     messages.append(
                         channel.send(
                             f"<@{channel.name}>, se você não conseguir confirmar sua inscrição, nós precisaremos remover esse canal para liberar espaço para outras pessoas. Caso isso aconteça, você poderá entrar novamente usando o mesmo link que enviamos por email. Marcando a {role.mention} para ajudarem."
                         )
                     )
-                elif channel_diff >= SECOND_WARNING_MIN:
+                elif (SECOND_WARNING_MIN + INACTIVY_MINUTES_CHECK) > channel_diff >= SECOND_WARNING_MIN:
                     logger.info(f"Second innativite warning {channel.name}")
                     messages.append(
                         channel.send(
                             f"<@{channel.name}>, estou avisando a {role.mention} para vir aqui te ajudar!"
                         )
                     )
-                elif channel_diff >= FIRST_WARNING_MIN:
+                elif (FIRST_WARNING_MIN + INACTIVY_MINUTES_CHECK) >  channel_diff >= FIRST_WARNING_MIN:
                     logger.info(f"First innativite warning {channel.name}")
                     messages.append(
                         channel.send(f"<@{channel.name}>, precisando de ajuda?")
