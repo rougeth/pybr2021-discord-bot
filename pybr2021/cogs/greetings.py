@@ -3,11 +3,11 @@ import json
 import time
 from base64 import b64encode
 from datetime import datetime, timedelta
-from re import T
 
 import discord
 import httpx
-from bot_msg import auth_instructions, auth_order_not_found, auth_user_not_found
+from bot_msg import (auth_instructions, auth_order_not_found,
+                     auth_user_not_found)
 from decouple import config
 from discord import message
 from discord.ext import commands, tasks
