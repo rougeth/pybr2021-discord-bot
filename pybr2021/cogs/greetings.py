@@ -3,6 +3,7 @@ import json
 import time
 from base64 import b64encode
 from datetime import datetime, timedelta
+from random import shuffle
 
 import discord
 import httpx
@@ -109,7 +110,7 @@ class Greetings(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.guild = None
+        self._guild = None
         self._attendees = []
         self._attendees_updated_at = None
         self._category = None
@@ -117,6 +118,7 @@ class Greetings(commands.Cog):
         self.index = {}
         self.load_indexes.start()
         self.check_inactivity.start()
+        self.auth_users.start()
 
     @tasks.loop(minutes=1)
     async def load_indexes(self):
@@ -155,6 +157,33 @@ class Greetings(commands.Cog):
     async def before_check_inactivity(self):
         await self.bot.wait_until_ready()
 
+    @tasks.loop(minutes=INACTIVY_MINUTES_CHECK)
+    async def auth_users(self):
+        guild = await self.get_guild()
+        channels = await guild.fetch_channels()
+
+        category = discord.utils.get(channels, name=self.CATEGORY_NAME)
+        channels_in_auth_category = [
+            channel.name for channel in channels
+            if channel.category_id == category.id
+        ]
+
+        members = await guild.fetch_members(limit=None).flatten()
+        members = [
+            member for member in members
+            if len(member.roles) == 1 and str(member.id) not in channels_in_auth_category
+        ]
+        logger.info(f"Total members missing authentication: {len(members)}")
+
+        shuffle(members)
+
+        available_channels = 50 - len(channels_in_auth_category)
+        logger.info(f"Available channels for authentication: {available_channels}")
+        for member in members[:available_channels]:
+            channel = await self.create_user_auth_channel(member, category)
+            await self.send_auth_instructions(channel, member)
+            logger.info(f"Recreating authication change for user. user={member.name}, channel={channel.name}")
+
     def default_permissions_overwrite(self, guild):
         return {
             guild.default_role: discord.PermissionOverwrite(
@@ -173,6 +202,11 @@ class Greetings(commands.Cog):
     async def get_member(self, guild: discord.Guild, id: int) -> discord.Role:
         members = await guild.fetch_members().flatten()
         return discord.utils.find(lambda m: str(m.id) == id, members)
+
+    async def get_guild(self):
+        if not self._guild:
+            self._guild = await self.bot.fetch_guild(config("DISCORD_GUILD_ID"))
+        return self._guild
 
     async def get_category(self, guild: discord.Guild) -> discord.CategoryChannel:
         if not self._category:
@@ -217,8 +251,8 @@ class Greetings(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        self.guild = await self.bot.fetch_guild(DISCORD_GUILD_ID)
-        self.invite_tracker = InviteTracker(self.bot, self.guild, ROLE_INVITE_MAP)
+        guild = await self.get_guild()
+        self.invite_tracker = InviteTracker(self.bot, guild, ROLE_INVITE_MAP)
         await self.invite_tracker.sync()
         logger.info(f"Invite tracker synced. invites={self.invite_tracker.invites!r}")
 
