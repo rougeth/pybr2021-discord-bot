@@ -99,7 +99,7 @@ def create_index(attendees):
     for attendee in attendees:
         profile = attendee["profile"]
         index[attendee["order_id"]] = profile
-        index[profile["email"].lower()] = profile
+        index[profile["email"]] = profile
     return index
 
 
@@ -304,7 +304,7 @@ class Greetings(commands.Cog):
 
         # TODO validar se usuário já está inscrito
 
-        profile = self.index.get(message.content.lower())
+        profile = self.index.get(message.content)
         if not profile:
             logger.info(
                 f"User not found on index. user_id={message.author.id}, content={message.content!r}"
