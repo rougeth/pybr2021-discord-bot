@@ -2,21 +2,27 @@ import asyncio
 import json
 import time
 from base64 import b64encode
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import discord
 import httpx
-from discord.ext import commands, tasks
-from loguru import logger
+from bot_msg import (auth_instructions, auth_order_not_found,
+                     auth_user_not_found)
 from decouple import config
-
+from discord import message
+from discord.ext import commands, tasks
 from discord_setup import get_or_create_channel
-from bot_msg import auth_instructions, auth_user_not_found, auth_order_not_found
 from invite_tracker import InviteTracker
-
+from loguru import logger
 
 EVENTBRITE_TOKEN = config("EVENTBRITE_TOKEN")
 DISCORD_GUILD_ID = config("DISCORD_GUILD_ID")
+
+INACTIVY_MINUTES_CHECK = config("INACTIVY_MINUTES_CHECK", 15)
+FIRST_WARNING_MIN = config("FIRST_WARNING_MIN", 15)
+SECOND_WARNING_MIN = config("SECOND_WARNING_MIN", 60)
+THIRD_WARNING_MIN = config("FIRST_WARNING_MIN", 120)
+KICK_MIN = config("KICK_MIN", 180)
 
 ROLE_INVITE_MAP = [
     ("Ministrantes", ["zuNYMG4jud"]),
@@ -105,6 +111,7 @@ class Greetings(commands.Cog):
         self._welcome_channel = None
         self.index = {}
         self.load_indexes.start()
+        self.check_inactivity.start()
 
     @tasks.loop(minutes=1)
     async def load_indexes(self):
@@ -121,6 +128,50 @@ class Greetings(commands.Cog):
                 self._attendees_updated_at,
             )
         )
+
+    @tasks.loop(minutes=INACTIVY_MINUTES_CHECK)
+    async def check_inactivity(self):
+        for guild in self.bot.guilds:
+            category = await self.get_category(guild)
+            now = datetime.utcnow()
+            messages = []
+            role = await self.get_org_role(guild)
+            for channel in category.text_channels:
+                channel_diff = (now - channel.created_at).total_seconds() / 60
+                if channel_diff >= KICK_MIN:
+                    kick_member = guild.get_member(int(channel.name))
+                    if kick_member:
+                        logger.info(
+                            f"Kicking user for inativite on auth={kick_member.name}"
+                        )
+                        await guild.kick(kick_member)
+                    logger.info(f"Removing user auth channel {channel.name}")
+                    await channel.delete()
+                elif (THIRD_WARNING_MIN + INACTIVY_MINUTES_CHECK) > channel_diff >= THIRD_WARNING_MIN:
+                    logger.info(f"Third innativite warning {channel.name}")
+                    messages.append(
+                        channel.send(
+                            f"<@{channel.name}>, se você não conseguir confirmar sua inscrição, nós precisaremos remover esse canal para liberar espaço para outras pessoas. Caso isso aconteça, você poderá entrar novamente usando o mesmo link que enviamos por email. Marcando a {role.mention} para ajudarem."
+                        )
+                    )
+                elif (SECOND_WARNING_MIN + INACTIVY_MINUTES_CHECK) > channel_diff >= SECOND_WARNING_MIN:
+                    logger.info(f"Second innativite warning {channel.name}")
+                    messages.append(
+                        channel.send(
+                            f"<@{channel.name}>, estou avisando a {role.mention} para vir aqui te ajudar!"
+                        )
+                    )
+                elif (FIRST_WARNING_MIN + INACTIVY_MINUTES_CHECK) >  channel_diff >= FIRST_WARNING_MIN:
+                    logger.info(f"First innativite warning {channel.name}")
+                    messages.append(
+                        channel.send(f"<@{channel.name}>, precisando de ajuda?")
+                    )
+
+            await asyncio.gather(*messages)
+
+    @check_inactivity.before_loop
+    async def before_check_inactivity(self):
+        await self.bot.wait_until_ready()
 
     def default_permissions_overwrite(self, guild):
         return {
@@ -205,7 +256,10 @@ class Greetings(commands.Cog):
         channel = message.channel
         author = message.author
         checks = [
-            (channel.type == discord.ChannelType.text and channel.name == str(author.id)),
+            (
+                channel.type == discord.ChannelType.text
+                and channel.name == str(author.id)
+            ),
             (
                 not author.bot
                 and getattr(author, "roles", False)
