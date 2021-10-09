@@ -111,7 +111,7 @@ class Greetings(commands.Cog):
         self._welcome_channel = None
         self.index = {}
         self.load_indexes.start()
-        self.need_help.start()
+        self.check_inactivity.start()
 
     @tasks.loop(minutes=1)
     async def load_indexes(self):
