@@ -115,6 +115,7 @@ class Greetings(commands.Cog):
         self._attendees_updated_at = None
         self._category = None
         self._welcome_channel = None
+        self._online_users = set()
         self.index = {}
         self.load_indexes.start()
         self.check_inactivity.start()
@@ -146,7 +147,6 @@ class Greetings(commands.Cog):
             for channel in category.text_channels:
                 channel_diff = (now - channel.created_at).total_seconds() / 60
                 if channel_diff >= KICK_MIN:
-                    await logchannel(self.bot, f"{channel.name} deletado por inatividade.")
                     logger.info(f"Channel deleted channel={channel.name}")
                     await channel.delete()
                 elif KICK_MIN >  channel_diff >= FIRST_WARNING_MIN:
@@ -177,8 +177,12 @@ class Greetings(commands.Cog):
 
         shuffle(members)
 
+        online = [member for member in members if member.id in self._online_users]
+        offline = [member for member in members if member.id not in self._online_users]
+        members = online + offline
+
         available_channels = 50 - len(channels_in_auth_category)
-        logger.info(f"Available channels for authentication: {available_channels}")
+        logger.info(f"Channels available for authentication. total={available_channels}, online_user={len(online)}, offline_users={len(offline)}")
         for member in members[:available_channels]:
             channel = await self.create_user_auth_channel(member, category)
             await self.send_auth_instructions(channel, member)
@@ -255,6 +259,16 @@ class Greetings(commands.Cog):
         self.invite_tracker = InviteTracker(self.bot, guild, ROLE_INVITE_MAP)
         await self.invite_tracker.sync()
         logger.info(f"Invite tracker synced. invites={self.invite_tracker.invites!r}")
+
+    @commands.Cog.listener()
+    async def on_member_update(self, before, after):
+        if after.status != discord.Status.offline:
+            self._online_users.add(after.id)
+        else:
+            try:
+                self._online_users.remove(after.id)
+            except KeyError:
+                pass
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
