@@ -19,11 +19,9 @@ EVENTBRITE_TOKEN = config("EVENTBRITE_TOKEN")
 DISCORD_GUILD_ID = config("DISCORD_GUILD_ID")
 DISCORD_LOG_CHANNEL_ID = config("DISCORD_LOG_CHANNEL_ID")
 
-INACTIVY_MINUTES_CHECK = config("INACTIVY_MINUTES_CHECK", cast=int, default=30) 
-FIRST_WARNING_MIN = config("FIRST_WARNING_MIN", cast=int, default=30) #30
-SECOND_WARNING_MIN = FIRST_WARNING_MIN+INACTIVY_MINUTES_CHECK #60
-THIRD_WARNING_MIN = SECOND_WARNING_MIN+INACTIVY_MINUTES_CHECK #90
-KICK_MIN = THIRD_WARNING_MIN+INACTIVY_MINUTES_CHECK #120
+INACTIVY_MINUTES_CHECK = config("INACTIVY_MINUTES_CHECK", cast=int, default=5)
+FIRST_WARNING_MIN = config("FIRST_WARNING_MIN", cast=int, default=5)
+KICK_MIN = FIRST_WARNING_MIN + INACTIVY_MINUTES_CHECK
 
 ROLE_INVITE_MAP = [
     ("Ministrantes", ["zuNYMG4jud"]),
@@ -139,51 +137,17 @@ class Greetings(commands.Cog):
     @tasks.loop(minutes=INACTIVY_MINUTES_CHECK)
     async def check_inactivity(self):
         logger.info("Start check inactivity")
-
-        # if not self.guild:
-        #     self.guild = await self.bot.fetch_guild(DISCORD_GUILD_ID) # Keep only for historic, but this get a empoty category.text_channels !!
-
         for guild in self.bot.guilds:
             category = await self.get_category(guild)
             now = datetime.utcnow()
             role = await self.get_org_role(guild)
             for channel in category.text_channels:
                 channel_diff = (now - channel.created_at).total_seconds() / 60
-                logger.info(f"Channel {channel.name} exists a {channel_diff} minutes")
                 if channel_diff >= KICK_MIN:
-                    kick_member = guild.get_member(int(channel.name))
-                    # Need check if user exists to kick, because some user can getout from server and channels keeps alive!!
-                    if kick_member:
-                        logger.info(
-                            f"User kicked from server for inactivity. {kick_member.mention}"
-                        )
-                        await logchannel(self.bot, f"{kick_member.mention} kickado por inatividade.")
-                        await self.guild.kick(kick_member)
                     await logchannel(self.bot, f"{channel.name} deletado por inatividade.")
                     logger.info(f"Channel deleted channel={channel.name}")
                     await channel.delete()
-                elif (KICK_MIN) > channel_diff >= THIRD_WARNING_MIN:
-                    await channel.send(
-                        f"<@{channel.name}>, se você não conseguir confirmar sua inscrição, "
-                        f"nós precisaremos remover esse canal para liberar espaço para outras "
-                        f"pessoas. Caso isso aconteça, você poderá entrar novamente usando o mesmo "
-                        f"link que enviamos por email. Marcando a {role.mention} para ajudarem."
-                    )
-                    await logchannel(self.bot,
-                        f"Credenciamento: Terceiro alerta enviado para <@{channel.name}> - {role.mention}"
-                    )
-                    logger.info(f"Third warning warning send to user due to inactivity. user_id={channel.name}")
-
-                elif (THIRD_WARNING_MIN) > channel_diff >= SECOND_WARNING_MIN:
-                    await channel.send(
-                        f"<@{channel.name}>, estou avisando a {role.mention} para vir aqui te ajudar!"
-                    )
-                    await logchannel(self.bot,
-                        f"Credenciamento: Segundo alerta enviado para <@{channel.name}> - {role.mention}"
-                    )
-                    logger.info(f"Second warning send to user due to inactivity. user_id={channel.name}")
-
-                elif (SECOND_WARNING_MIN) >  channel_diff >= FIRST_WARNING_MIN:
+                elif KICK_MIN >  channel_diff >= FIRST_WARNING_MIN:
                     await channel.send(f"<@{channel.name}>, precisando de ajuda?")
                     logger.info(f"First warning warning send to user due to inactivity. user_id={channel.name}")
 
@@ -267,10 +231,8 @@ class Greetings(commands.Cog):
         guild = member.guild
         category = await self.get_category(member.guild)
         channel = await self.create_user_auth_channel(member, category)
-        
 
         await self.send_auth_instructions(channel, member)
-
 
     def should_authenticate_user(self, message: discord.Message):
         channel = message.channel
