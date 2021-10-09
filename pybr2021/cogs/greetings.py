@@ -18,11 +18,11 @@ from loguru import logger
 EVENTBRITE_TOKEN = config("EVENTBRITE_TOKEN")
 DISCORD_GUILD_ID = config("DISCORD_GUILD_ID")
 
-INACTIVY_MINUTES_CHECK = config("INACTIVY_MINUTES_CHECK", 15)
-FIRST_WARNING_MIN = config("FIRST_WARNING_MIN", 15)
-SECOND_WARNING_MIN = config("SECOND_WARNING_MIN", 60)
-THIRD_WARNING_MIN = config("FIRST_WARNING_MIN", 120)
-KICK_MIN = config("KICK_MIN", 180)
+INACTIVY_MINUTES_CHECK = config("INACTIVY_MINUTES_CHECK", cast=int, default=15)
+FIRST_WARNING_MIN = config("FIRST_WARNING_MIN", cast=int, default=15)
+SECOND_WARNING_MIN = config("SECOND_WARNING_MIN", cast=int, default=60)
+THIRD_WARNING_MIN = config("FIRST_WARNING_MIN", cast=int, default=120)
+KICK_MIN = config("KICK_MIN", cast=int, default=180)
 
 ROLE_INVITE_MAP = [
     ("Ministrantes", ["zuNYMG4jud"]),
