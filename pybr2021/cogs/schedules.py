@@ -1,11 +1,9 @@
 import asyncio
 import datetime
-import json
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from pprint import pprint
 
 import bot_msg
-import discord
 import httpx
 from decouple import config
 from discord.ext import commands, tasks
