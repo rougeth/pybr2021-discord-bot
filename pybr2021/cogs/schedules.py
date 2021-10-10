@@ -58,9 +58,7 @@ class Schedules(commands.Cog):
         return events
 
     def create_index(self,events):
-        index = {}
-        for event in events:
-            index[event["start"].date()] = []
+        index = defaultdict(list)
         for event in events:
             index[event["start"].date()].append(event)
         
