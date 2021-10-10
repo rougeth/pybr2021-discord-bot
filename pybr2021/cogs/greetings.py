@@ -207,7 +207,8 @@ class Greetings(commands.Cog):
         offline = [member for member in members if member.id not in self._online_users]
         members = online + offline
 
-        available_channels = 50 - len(channels_in_auth_category)
+        available_channels = (len(categories) * 50) - len(channels_in_auth_category)
+        available_channels = int(available_channels / 4)
         logger.info(f"Channels available for authentication. total={available_channels}, online_user={len(online)}, offline_users={len(offline)}")
         for member in members[:available_channels]:
             channel = await self.create_user_auth_channel(guild, member)
