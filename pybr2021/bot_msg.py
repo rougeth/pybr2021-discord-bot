@@ -13,31 +13,21 @@ auth_instructions = """
 (pt-br)
 Olá {name}, 
 
-:warning: Para ter acesso ao conteúdo da Python Brasil, nos envia aquí o **e-mail que você se inscreveu no EventBrite** OU o **número da sua inscrição** sem nenhum texto adicionar, por exemplo:
+Confirme a sua participação na Python Brasil 2021:
 
-fulaninha@python.org.br 
+:warning: **Digite aquí o e-mail que você se inscreveu no EventBrite**
 
-Essas informações estão no email de confirmação enviado pelo Eventbrite. Pesquise por `Confirmação da inscrição para Python Brasil 2021` no seu email ou acesse sua conta no Eventbrite.
-
-Este servidor é exclusivo para participantes da Python Brasil 2021. Por isso, precisamos confirmar a sua inscrição para que você tenha acesso aos canais de texto, voz e todo o conteúdo do evento.
-
-Se você ainda não fez sua inscrição para o evento, não tem problema, vá até o link abaixo, se cadastre e volte aqui quando tiver tudo pronto.
-<https://www.eventbrite.com.br/e/python-brasil-2021-registration-169078058023>
+Caso você ainda não tenha se inscrito, registre-se em <bit.ly/pybr2021> antes de acessar este servidor.
 
 ---
 (es)
 Hola {name}, 
 
-:warning: Para tener acceso al contenido del servidor, colga aquí el **correo que ocupaste en el EventBrite** O el **número de tu inscripción** sin texto adicional, por ejemplo:
+Confirme su participación en la Python Brasil 2021:
 
-guay@python.org.br
+:warning: ** Colgue aquí el correo que ocupaste en el EventBrite**
 
-Estos dos datos se encuentran en el correo electrónico de confirmación enviado por Eventbrite. Busca la confirmación de inscripción de Python Brasil 2021 en tu correo electrónico o inicia sesión en tu cuenta de Eventbrite.
-
-Este servidor es exclusivo para asistentes de la Python Brasil 2021. Por lo tanto, necesitamos confirmar tu inscripción para que tengas acceso al los canales de voz, texto y todo el contenido del evento.
-
-Si aún no te has registrado para el evento, no hay problema, utiliza el enlace debajo, regístrate y compárteme los datos aquí.
-<https://www.eventbrite.com.br/e/python-brasil-2021-registration-169078058023>
+Si aún no te has registrado, hagalo en <bit.ly/pybr2021> antes de accesar este servidor.
 """
 
 auth_order_not_found = """

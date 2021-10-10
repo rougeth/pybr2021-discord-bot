@@ -20,6 +20,7 @@ from loguru import logger
 EVENTBRITE_TOKEN = config("EVENTBRITE_TOKEN")
 DISCORD_GUILD_ID = config("DISCORD_GUILD_ID")
 DISCORD_LOG_CHANNEL_ID = config("DISCORD_LOG_CHANNEL_ID")
+DISCORD_NUMBER_OF_AUTH_CATEGORIES = config("DISCORD_NUMBER_OF_AUTH_CATEGORIES", cast=int, default=6)
 
 INACTIVY_MINUTES_CHECK = config("INACTIVY_MINUTES_CHECK", cast=int, default=5)
 FIRST_WARNING_MIN = config("FIRST_WARNING_MIN", cast=int, default=5)
@@ -38,7 +39,7 @@ def only_log_exceptions(function):
         try:
             return await function(*args, **kwargs)
         except:
-            logger.exception(f"Error while calling {f!r}")
+            logger.exception(f"Error while calling {function!r}")
     return wrapper
 
 
@@ -124,7 +125,7 @@ class Greetings(commands.Cog):
         self._guild = None
         self._attendees = []
         self._attendees_updated_at = None
-        self._category = None
+        self._categories = []
         self._welcome_channel = None
         self._online_users = set()
         self.index = {}
@@ -154,17 +155,23 @@ class Greetings(commands.Cog):
     async def check_inactivity(self):
         logger.info("Start check inactivity")
         for guild in self.bot.guilds:
-            category = await self.get_category(guild)
             now = datetime.utcnow()
             role = await self.get_org_role(guild)
-            for channel in category.text_channels:
-                channel_diff = (now - channel.created_at).total_seconds() / 60
-                if channel_diff >= KICK_MIN:
-                    logger.info(f"Channel deleted channel={channel.name}")
-                    await channel.delete()
-                elif KICK_MIN >  channel_diff >= FIRST_WARNING_MIN:
-                    await channel.send(f"<@{channel.name}>, precisando de ajuda?")
-                    logger.info(f"First warning warning send to user due to inactivity. user_id={channel.name}")
+            categories = await self.get_categories(guild)
+            channels_deleted = warnings_sent = 0
+            for category in categories:
+                for channel in category.text_channels:
+                    channel_diff = (now - channel.created_at).total_seconds() / 60
+                    if channel_diff >= KICK_MIN:
+                        logger.info(f"Channel deleted channel={channel.name}")
+                        await channel.delete()
+                        channels_deleted += 1
+                    elif KICK_MIN >  channel_diff >= FIRST_WARNING_MIN:
+                        await channel.send(f"<@{channel.name}>, precisando de ajuda?")
+                        logger.info(f"First warning warning send to user due to inactivity. user_id={channel.name}")
+                        warnings_sent += 1
+            await logchannel(self.bot, f"{channels_deleted} canais de credenciamento deletados e {warnings_sent} avisos enviados.")
+
 
     @check_inactivity.before_loop
     async def before_check_inactivity(self):
@@ -177,9 +184,13 @@ class Greetings(commands.Cog):
         channels = await guild.fetch_channels()
 
         category = discord.utils.get(channels, name=self.CATEGORY_NAME)
+        categories = [
+            channel.id for channel in channels
+            if channel.name.startswith("Credenciamento")
+        ]
         channels_in_auth_category = [
             channel.name for channel in channels
-            if channel.category_id == category.id
+            if channel.category_id in categories
         ]
 
         members = await guild.fetch_members(limit=None).flatten()
@@ -188,6 +199,7 @@ class Greetings(commands.Cog):
             if len(member.roles) == 1 and str(member.id) not in channels_in_auth_category
         ]
         logger.info(f"Total members missing authentication: {len(members)}")
+        await logchannel(self.bot, f"Usuários sem autenticação: {len(members)}")
 
         shuffle(members)
 
@@ -195,10 +207,11 @@ class Greetings(commands.Cog):
         offline = [member for member in members if member.id not in self._online_users]
         members = online + offline
 
-        available_channels = 50 - len(channels_in_auth_category)
+        available_channels = (len(categories) * 50) - len(channels_in_auth_category)
+        available_channels = int(available_channels / 4)
         logger.info(f"Channels available for authentication. total={available_channels}, online_user={len(online)}, offline_users={len(offline)}")
         for member in members[:available_channels]:
-            channel = await self.create_user_auth_channel(member, category)
+            channel = await self.create_user_auth_channel(guild, member)
             await self.send_auth_instructions(channel, member)
             logger.info(f"Recreating authication change for user. user={member.name}, channel={channel.name}")
 
@@ -226,16 +239,18 @@ class Greetings(commands.Cog):
             self._guild = await self.bot.fetch_guild(config("DISCORD_GUILD_ID"))
         return self._guild
 
-    async def get_category(self, guild: discord.Guild) -> discord.CategoryChannel:
-        if not self._category:
+    async def get_categories(self, guild: discord.Guild) -> discord.CategoryChannel:
+        if not self._categories:
             overwrites = self.default_permissions_overwrite(guild)
-            self._category = await get_or_create_channel(
-                self.CATEGORY_NAME,
-                guild,
-                discord.ChannelType.category,
-                overwrites=overwrites,
-            )
-        return self._category
+            for i in range(DISCORD_NUMBER_OF_AUTH_CATEGORIES):
+                category = await get_or_create_channel(
+                    f"{self.CATEGORY_NAME}-{i}",
+                    guild,
+                    discord.ChannelType.category,
+                    overwrites=overwrites,
+                )
+                self._categories.append(category)
+        return self._categories
 
     async def send_auth_instructions(
         self, channel: discord.TextChannel, member: discord.Member
@@ -243,19 +258,29 @@ class Greetings(commands.Cog):
         await channel.send(auth_instructions.format(name=member.mention))
 
     async def create_user_auth_channel(
-        self, member: discord.Member, category: discord.CategoryChannel
+        self, guild, member: discord.Member
     ):
+
         org_role = await self.get_org_role(member.guild)
         overwrites = self.default_permissions_overwrite(member.guild)
         overwrites[member] = discord.PermissionOverwrite(read_messages=True)
         overwrites[org_role] = discord.PermissionOverwrite(read_messages=True)
 
-        return await get_or_create_channel(
-            str(member.id),
-            member.guild,
-            category=category,
-            overwrites=overwrites,
-        )
+        categories = await self.get_categories(guild)
+        shuffle(categories)
+        for category in categories:
+            try:
+                return await get_or_create_channel(
+                    str(member.id),
+                    member.guild,
+                    category=category,
+                    overwrites=overwrites,
+                )
+            except discord.errors.HTTPException:
+                logger.info(f"Category full, retrying with next one. member={member}, id={member.id}")
+
+        logger.info(f"No channel available in any of the categories")
+        return None
 
     @commands.command(name="check-eventbrite")
     async def check_eventbrite(self, ctx, value):
@@ -291,8 +316,7 @@ class Greetings(commands.Cog):
             return
 
         guild = member.guild
-        category = await self.get_category(member.guild)
-        channel = await self.create_user_auth_channel(member, category)
+        channel = await self.create_user_auth_channel(guild, member)
 
         await self.send_auth_instructions(channel, member)
 
@@ -312,7 +336,7 @@ class Greetings(commands.Cog):
             ),
             (
                 getattr(channel, "category", False)
-                and channel.category.name == self.CATEGORY_NAME
+                and channel.category.name.startswith("Credenciamento")
             ),
         ]
         return all(checks)
@@ -326,8 +350,6 @@ class Greetings(commands.Cog):
             f"Authenticating user. user={message.author.name}, id={message.author.id}, content={message.content}"
         )
 
-        # TODO validar se usuário já está inscrito
-
         profile = self.index.get(message.content.lower())
         if not profile:
             logger.info(
@@ -337,6 +359,7 @@ class Greetings(commands.Cog):
             await logchannel(self.bot, (
                 f"Inscrição não encontrada."
                 f"\n- Canal: {message.channel.mention}"
+                f"\n- Membro: {message.author.mention}"
                 f"\n- Termo: `{message.content}`"
             ))
             return
@@ -354,7 +377,7 @@ class Greetings(commands.Cog):
         role = await self.get_attendee_role(message.guild)
         await member.add_roles(role)
         await message.channel.delete()
-        await logchannel(self.bot, f"Inscrição confirmada, participante {member.mention}")
+        await logchannel(self.bot, f"Inscrição confirmada, participante {member.mention}. Canal <#{member.id}> ({member.id})")
         logger.info(
-            f"User authenticated and channel deleted. user={message.author.name}"
+            f"User authenticated and channel deleted. user={message.author.name}, id={message.author.id}"
         )
