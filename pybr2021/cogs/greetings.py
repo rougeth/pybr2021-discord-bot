@@ -153,26 +153,35 @@ class Greetings(commands.Cog):
     @tasks.loop(minutes=INACTIVY_MINUTES_CHECK)
     @only_log_exceptions
     async def check_inactivity(self):
-        logger.info("Start check inactivity")
-        for guild in self.bot.guilds:
-            now = datetime.utcnow()
-            role = await self.get_org_role(guild)
-            categories = await self.get_categories(guild)
-            logger.info(f"Checking categories. categories={categories}")
-            channels_deleted = warnings_sent = 0
-            for category in categories:
-                logger.info(f"Checking channels on category. category={category.name}, channels={len(category.text_channels)}")
-                for channel in category.text_channels:
-                    channel_diff = (now - channel.created_at).total_seconds() / 60
-                    if channel_diff >= KICK_MIN:
-                        logger.info(f"Channel deleted channel={channel.name}")
-                        await channel.delete()
-                        channels_deleted += 1
-                    elif KICK_MIN >  channel_diff >= FIRST_WARNING_MIN:
-                        await channel.send(f"<@{channel.name}>, precisando de ajuda?")
-                        logger.info(f"First warning warning send to user due to inactivity. user_id={channel.name}")
-                        warnings_sent += 1
-            await logchannel(self.bot, f"{channels_deleted} canais de credenciamento deletados e {warnings_sent} avisos enviados.")
+        guild = await self.get_guild()
+        channels = await guild.fetch_channels()
+
+        category = discord.utils.get(channels, name=self.CATEGORY_NAME)
+        categories = [
+            channel.id for channel in channels
+            if channel.name.startswith("Credenciamento")
+        ]
+        channels_in_auth_category = [
+            channel for channel in channels
+            if channel.category_id in categories
+        ]
+
+        now = datetime.utcnow()
+        role = await self.get_org_role(guild)
+        channels_deleted = warnings_sent = 0
+
+        logger.info(f"Checking inactive channels. channels={len(channels_in_auth_category)}")
+        for channel in channels_in_auth_category:
+            channel_diff = (now - channel.created_at).total_seconds() / 60
+            if channel_diff >= KICK_MIN:
+                logger.info(f"Channel deleted channel={channel.name}")
+                await channel.delete()
+                channels_deleted += 1
+            elif KICK_MIN >  channel_diff >= FIRST_WARNING_MIN:
+                await channel.send(f"<@{channel.name}>, precisando de ajuda?")
+                logger.info(f"First warning warning send to user due to inactivity. user_id={channel.name}")
+                warnings_sent += 1
+        await logchannel(self.bot, f"{channels_deleted} canais de credenciamento deletados e {warnings_sent} avisos enviados.")
 
 
     @check_inactivity.before_loop
