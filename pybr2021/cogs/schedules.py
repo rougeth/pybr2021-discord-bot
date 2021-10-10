@@ -2,6 +2,7 @@ import asyncio
 import datetime
 from datetime import datetime, timedelta
 from pprint import pprint
+from collections import defaultdict
 
 import bot_msg
 import httpx
@@ -33,7 +34,7 @@ class Schedules(commands.Cog):
         semaphore = asyncio.BoundedSemaphore(10)
         async with httpx.AsyncClient() as client:
             response = await self.http_get_json(semaphore, client, url)
-        
+
         logger.info("Parsing events")
         self._events = await self.parse_events(response)
         self.index = self.create_index(self._events)
@@ -52,7 +53,7 @@ class Schedules(commands.Cog):
                         'author':item.get('extendedProperties').get('private').get('author'),
                         'discord_channel':item.get('extendedProperties').get('private').get('discord_channel'),
                         'type':item.get('extendedProperties').get('private').get('type'),
-                        'youtube_channel':item.get('extendedProperties').get('private').get('youtube_channel'),  
+                        'youtube_channel':item.get('extendedProperties').get('private').get('youtube_channel'),
                     }
             )
         return events
@@ -61,7 +62,7 @@ class Schedules(commands.Cog):
         index = defaultdict(list)
         for event in events:
             index[event["start"].date()].append(event)
-        
+
         return index
 
     async def http_get_json(self,semaphore, client, url, retry=3):
@@ -87,16 +88,16 @@ class Schedules(commands.Cog):
         logger.info("Sending Schedules to channel")
         now_calendar = datetime.now().replace(tzinfo=timezone(CALENDER_TIMEZONE))
         today_events = self.index.get(now_calendar.date(),[])
-        today_events = sorted(today_events, key=lambda itens: itens['start']) 
+        today_events = sorted(today_events, key=lambda itens: itens['start'])
         event_show=[]
         if today_events:
             for event in today_events:
                 if (now_calendar + timedelta(minutes=15)) >= event.get("start") >= now_calendar:
                     event_show.append(await self.format_message(event))
         if event_show:
-            await self.send_event(bot_msg.schedule_message_header + ''.join(event_show)) 
+            await self.send_event(bot_msg.schedule_message_header + ''.join(event_show))
             logger.info("Next events sent to channel")
-                
+
     async def format_message(self,event):
         paramns = {
             "hour":event.get("start").astimezone(timezone(event.get("timezone"))).strftime(HOUR_FMT),
