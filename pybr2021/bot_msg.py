@@ -50,3 +50,11 @@ Marcando a @organização para ajudar.
 Ops, no encontré una persona con el id **{id}** en el Discord.
 Llamo la @organização para ayudarte.
 """
+
+schedule_message_header = """
+:exclamation::exclamation::exclamation::clock1: **Veja o que vai vai rolar na Programação da Python Brasil ainda hoje** :clock1::exclamation::exclamation::exclamation:
+"""
+
+schedule_message = """{type} - {hour} - {title} {author}
+{discord} {youtube}
+"""
