@@ -1,9 +1,10 @@
 import asyncio
 import datetime
 import json
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from pprint import pprint
 
+import bot_msg
 import discord
 import httpx
 from decouple import config
@@ -12,47 +13,60 @@ from loguru import logger
 from pytz import timezone
 
 CALENDAR_URL='https://www.googleapis.com/calendar/v3/calendars/7siodq5un9gqbqd4mmgf2poiqs@group.calendar.google.com/events?key=AIzaSyAIn8DyZFtthupLozgwIX3NUURFMWEIPb4&timeMin=2021-10-11T00:00:00.000Z&timeMax=2021-10-18T00:00:00.000Z&singleEvents=true&maxResults=9999&timeZone=UTC'
-CALENDER_TIMEZONE='America/Sao_Paulo'
+CALENDER_TIMEZONE= 'UTC'
+SHOW_TIMEZONE='America/Sao_Paulo'
+DISCORD_MSG_CHANNEL_ID='859819206584959007'
+DATE_FMT = "%d/%m/%Y %H:%M:%S"
+HOUR_FMT = "%H:%M"
+class Schedules(commands.Cog):
 
-DISCORD_MSG_CHANNEL_ID='896438209020579951'
-
-class Schedules(): # commands.Cog):
-    
-    # def __init__(self, bot: commands.Bot):
-    #     self.bot = bot
-        # self.weekly_meeting_points.start()
-    
     def  __init__(self,bot):
         self.loop = asyncio.get_event_loop()
         self._events = None
+        self.index = {}
         self._bot = bot
+        self.alerts_type=["talk","closing","keynote","panel"]
         self.load_events.start()
 
     @tasks.loop(minutes=1)
     async def load_events(self):
+        logger.info("Loading calendar events.")
         url = CALENDAR_URL
         semaphore = asyncio.BoundedSemaphore(10)
         async with httpx.AsyncClient() as client:
             response = await self.http_get_json(semaphore, client, url)
         
+        logger.info("Parsing events")
         self._events = await self.parse_events(response)
+        self.index = self.create_index(self._events)
+        logger.info("Calendar finished load")
 
-   
     async def parse_events(self,response):
         events=[]
         for item in response.get("items"):
-            events.append(
-                {
-                    'start':item.get('start').get('dateTime'),
-                    'timezone':item.get('start').get('timeZone'),
-                    'title':item.get('extendedProperties').get('private').get('title'),
-                    'author':item.get('extendedProperties').get('private').get('author'),
-                    'discord_channel':item.get('extendedProperties').get('private').get('discord_channel'),
-                    'type':item.get('extendedProperties').get('private').get('type'),
-                    'youtube_channel':item.get('extendedProperties').get('private').get('youtube_channel'),  
-                }
+            if item.get('extendedProperties').get('private').get('type') in self.alerts_type:
+                events.append(
+                    {
+                        'start': datetime.strptime(item.get('start').get('dateTime'),'%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=timezone(CALENDER_TIMEZONE)),
+                        'timezone':item.get('start').get('timeZone'),
+                        'location':item.get('location'),
+                        'title':item.get('extendedProperties').get('private').get('title'),
+                        'author':item.get('extendedProperties').get('private').get('author'),
+                        'discord_channel':item.get('extendedProperties').get('private').get('discord_channel'),
+                        'type':item.get('extendedProperties').get('private').get('type'),
+                        'youtube_channel':item.get('extendedProperties').get('private').get('youtube_channel'),  
+                    }
             )
         return events
+
+    def create_index(self,events):
+        index = {}
+        for event in events:
+            index[event["start"].date()] = []
+        for event in events:
+            index[event["start"].date()].append(event)
+        
+        return index
 
     async def http_get_json(self,semaphore, client, url, retry=3):
         async with semaphore:
@@ -65,23 +79,40 @@ class Schedules(): # commands.Cog):
                     return await self.http_get_json(semaphore, client, url, retry - 1)
                 logger.exception("Erro")
 
+    @commands.command(name="next-talks")
+    async def next_events_manual(self,ctx):
+        await self.send_next_events()
+
+    @tasks.loop(minutes=15)
     async def next_events(self):
-        now_calendar = datetime.utcnow().replace(tzinfo=timezone(CALENDER_TIMEZONE))
-        event_show=[]
-        for event in self._events:
-            if event.get('start') >= now_calendar:
-                event_show.append(await self.format_message(event))
+        await self.send_next_events()
+
+    async def send_next_events(self):
+        logger.info("Sending Schedules to channel")
+        now_calendar = datetime.now().replace(tzinfo=timezone(CALENDER_TIMEZONE))
+        today_events = self.index.get(now_calendar.date())
+        if today_events:
+            today_events = sorted(today_events, key=lambda itens: itens['start']) 
+            event_show=[]
+            if today_events:
+                for event in today_events:
+                    if (now_calendar + timedelta(minutes=15)) >= event.get("start") >= now_calendar:
+                        event_show.append(await self.format_message(event))
+            if event_show:
+                await self.send_event(bot_msg.schedule_message_header + ''.join(event_show)) 
+                logger.info("Next events sent to channel")
                 
     async def format_message(self,event):
-        return f'{event.get("type")} - {event.get("start").strftime("%d-%m-%Y %H:%M")} - {event.get("title")} - {event.get("author")} - <{event.get("youtube_channel")}> - <{event.get("discord_channel")}>'
+        paramns = {
+            "hour":event.get("start").astimezone(timezone(event.get("timezone"))).strftime(HOUR_FMT),
+            "type":event.get("type").capitalize(),
+            "title":f"**{event.get('title')}**",
+            "author":f" - *{event.get('author')}*" if event.get("author") != "" else "",
+            "youtube":f" - <{event.get('youtube_channel')}>",
+            "discord":f" - <{event.get('discord_channel')}>" if event.get("discord_channel") != "" else ""
+        }
+        return bot_msg.schedule_message.format(**paramns)
 
     async def send_event(self, message):
         channel = await self._bot.fetch_channel(DISCORD_MSG_CHANNEL_ID)
         await channel.send(message)
-
-
-
-
-
-
-

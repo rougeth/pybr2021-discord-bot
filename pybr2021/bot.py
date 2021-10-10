@@ -24,6 +24,7 @@ DISCORD_TOKEN = config("DISCORD_TOKEN")
 bot = commands.Bot(command_prefix="pybr!", intents=discord.Intents.all())
 bot.add_cog(cogs.Reminders(bot))
 bot.add_cog(cogs.Greetings(bot))
+bot.add_cog(cogs.Schedules(bot))
 
 config_file = toml.load("./config.toml")
 
