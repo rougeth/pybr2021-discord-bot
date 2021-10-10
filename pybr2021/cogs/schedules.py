@@ -88,17 +88,16 @@ class Schedules(commands.Cog):
     async def send_next_events(self):
         logger.info("Sending Schedules to channel")
         now_calendar = datetime.now().replace(tzinfo=timezone(CALENDER_TIMEZONE))
-        today_events = self.index.get(now_calendar.date())
+        today_events = self.index.get(now_calendar.date(),[])
+        today_events = sorted(today_events, key=lambda itens: itens['start']) 
+        event_show=[]
         if today_events:
-            today_events = sorted(today_events, key=lambda itens: itens['start']) 
-            event_show=[]
-            if today_events:
-                for event in today_events:
-                    if (now_calendar + timedelta(minutes=15)) >= event.get("start") >= now_calendar:
-                        event_show.append(await self.format_message(event))
-            if event_show:
-                await self.send_event(bot_msg.schedule_message_header + ''.join(event_show)) 
-                logger.info("Next events sent to channel")
+            for event in today_events:
+                if (now_calendar + timedelta(minutes=15)) >= event.get("start") >= now_calendar:
+                    event_show.append(await self.format_message(event))
+        if event_show:
+            await self.send_event(bot_msg.schedule_message_header + ''.join(event_show)) 
+            logger.info("Next events sent to channel")
                 
     async def format_message(self,event):
         paramns = {
