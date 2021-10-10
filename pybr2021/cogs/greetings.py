@@ -371,7 +371,7 @@ class Greetings(commands.Cog):
         role = await self.get_attendee_role(message.guild)
         await member.add_roles(role)
         await message.channel.delete()
-        await logchannel(self.bot, f"Inscrição confirmada, participante {member.mention}. Canal <#{member.id}>")
+        await logchannel(self.bot, f"Inscrição confirmada, participante {member.mention}. Canal {member.id}")
         logger.info(
             f"User authenticated and channel deleted. user={message.author.name}, id={message.author.id}"
         )
