@@ -158,8 +158,10 @@ class Greetings(commands.Cog):
             now = datetime.utcnow()
             role = await self.get_org_role(guild)
             categories = await self.get_categories(guild)
+            logger.info(f"Checking categories. categories={categories}")
             channels_deleted = warnings_sent = 0
             for category in categories:
+                logger.info(f"Checking channels on category. category={category.name}, channels={len(category.text_channels)}")
                 for channel in category.text_channels:
                     channel_diff = (now - channel.created_at).total_seconds() / 60
                     if channel_diff >= KICK_MIN:
@@ -356,6 +358,7 @@ class Greetings(commands.Cog):
                 f"User not found on index. user_id={message.author.id}, content={message.content!r}"
             )
             role = await self.get_org_role(message.guild)
+            await message.add_reaction("❌")
             await logchannel(self.bot, (
                 f"Inscrição não encontrada."
                 f"\n- Canal: {message.channel.mention}"
