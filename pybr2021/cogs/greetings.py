@@ -158,15 +158,20 @@ class Greetings(commands.Cog):
             now = datetime.utcnow()
             role = await self.get_org_role(guild)
             categories = await self.get_categories(guild)
+            channels_deleted = warnings_sent = 0
             for category in categories:
                 for channel in category.text_channels:
                     channel_diff = (now - channel.created_at).total_seconds() / 60
                     if channel_diff >= KICK_MIN:
                         logger.info(f"Channel deleted channel={channel.name}")
                         await channel.delete()
+                        channels_deleted += 1
                     elif KICK_MIN >  channel_diff >= FIRST_WARNING_MIN:
                         await channel.send(f"<@{channel.name}>, precisando de ajuda?")
                         logger.info(f"First warning warning send to user due to inactivity. user_id={channel.name}")
+                        warnings_sent += 1
+            await logchannel(self.bot, f"{channels_deleted} canais de credenciamento deletados e {warning_sent} avisos enviados.")
+
 
     @check_inactivity.before_loop
     async def before_check_inactivity(self):
