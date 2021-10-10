@@ -184,9 +184,13 @@ class Greetings(commands.Cog):
         channels = await guild.fetch_channels()
 
         category = discord.utils.get(channels, name=self.CATEGORY_NAME)
+        categories = [
+            channel.id for channel in channels
+            if channel.name.startswith("Credenciamento")
+        ]
         channels_in_auth_category = [
             channel.name for channel in channels
-            if channel.category_id == category.id
+            if channel.category_id in categories
         ]
 
         members = await guild.fetch_members(limit=None).flatten()
@@ -195,6 +199,7 @@ class Greetings(commands.Cog):
             if len(member.roles) == 1 and str(member.id) not in channels_in_auth_category
         ]
         logger.info(f"Total members missing authentication: {len(members)}")
+        await logchannel(self.bot, f"Usuários sem autenticação: {len(members)}")
 
         shuffle(members)
 
