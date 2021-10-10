@@ -10,6 +10,8 @@ loguru = "*"
 toml = "*"
 httpx = "*"
 sentry-sdk = "*"
+pytz = "*"
+
 
 [dev-packages]
 black = "*"
