@@ -13,7 +13,7 @@ from pytz import timezone
 CALENDAR_URL='https://www.googleapis.com/calendar/v3/calendars/7siodq5un9gqbqd4mmgf2poiqs@group.calendar.google.com/events?key=AIzaSyAIn8DyZFtthupLozgwIX3NUURFMWEIPb4&timeMin=2021-10-11T00:00:00.000Z&timeMax=2021-10-18T00:00:00.000Z&singleEvents=true&maxResults=9999&timeZone=UTC'
 CALENDER_TIMEZONE= 'UTC'
 SHOW_TIMEZONE='America/Sao_Paulo'
-DISCORD_MSG_CHANNEL_ID='859819206584959007'
+DISCORD_MSG_CHANNEL_ID='859819206584959007'  # Python Brasil 2021 > Geral
 DATE_FMT = "%d/%m/%Y %H:%M:%S"
 HOUR_FMT = "%H:%M"
 class Schedules(commands.Cog):
