@@ -26,7 +26,7 @@ class Schedules(commands.Cog):
         self.alerts_type=["talk","closing","keynote","panel"]
         self.load_events.start()
 
-    @tasks.loop(minutes=1)
+    @tasks.loop(minutes=60)
     async def load_events(self):
         logger.info("Loading calendar events.")
         url = CALENDAR_URL
