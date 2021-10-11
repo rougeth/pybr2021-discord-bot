@@ -117,6 +117,10 @@ class Schedules(commands.Cog):
     async def boteco(self,ctx):
         await self.sender(bot_msg.buteco)
 
+    @commands.command(name="hello",brief="Send a hello message")
+    async def hello(self,ctx):
+        await self.sender(bot_msg.hello)
+
     async def sender(self,message):
         channel = await self._bot.fetch_channel(DISCORD_MSG_CHANNEL_ID)
         await channel.send(message)
