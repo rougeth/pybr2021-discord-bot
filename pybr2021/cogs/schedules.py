@@ -16,6 +16,7 @@ CALENDER_TIMEZONE= 'UTC'
 SHOW_TIMEZONE='America/Sao_Paulo'
 DISCORD_MSG_CHANNEL_ID='859819206584959007'  # Python Brasil 2021 > Geral
 
+
 DATE_FMT = "%d/%m/%Y %H:%M:%S"
 HOUR_FMT = "%H:%M"
 class Schedules(commands.Cog):
@@ -98,7 +99,7 @@ class Schedules(commands.Cog):
                     print(event.get("start"))
                     event_show.append(await self.format_message(event))
         if event_show:
-            await self.send_event(bot_msg.schedule_message_header + ''.join(event_show))
+            await self.sender(bot_msg.schedule_message_header + ''.join(event_show))
             logger.info("Next events sent to channel")
 
     async def format_message(self,event):
@@ -111,7 +112,11 @@ class Schedules(commands.Cog):
             "discord":f"<#{event.get('discord_channel')}>" if event.get("discord_channel") != "" else ""
         }
         return bot_msg.schedule_message.format(**paramns)
+    
+    @commands.command(name="boteco",brief="Send a remember to use buteco")
+    async def boteco(self,ctx):
+        await self.sender(bot_msg.buteco)
 
-    async def send_event(self, message):
+    async def sender(self,message):
         channel = await self._bot.fetch_channel(DISCORD_MSG_CHANNEL_ID)
         await channel.send(message)
