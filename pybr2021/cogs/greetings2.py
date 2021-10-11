@@ -264,7 +264,7 @@ class Greetings2(commands.Cog):
         await ctx.message.delete()
         await logchannel(self.bot, f"Usuário confirmou inscrição com commando. {ctx.author.mention}")
 
-    @commands.command(name="check-eventbrite2",brief="Check if user has eventbrite [email or tickeid]")
+    @commands.command(name="check-eventbrite",brief="Check if user has eventbrite [email or tickeid]")
     async def check_eventbrite(self, ctx, value):
         profile = self.index.get(value)
         if profile:
