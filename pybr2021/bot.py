@@ -22,13 +22,13 @@ if SENTRY_TOKEN:
 DISCORD_TOKEN = config("DISCORD_TOKEN")
 
 bot = commands.Bot(command_prefix="pybr!", intents=discord.Intents.all())
-#bot.add_cog(cogs.Reminders(bot))
-#bot.add_cog(cogs.Greetings(bot))
+bot.add_cog(cogs.Reminders(bot))
+bot.add_cog(cogs.Greetings(bot))
 bot.add_cog(cogs.Schedules(bot))
 
 config_file = toml.load("./config.toml")
-#DEFAULT_CHANNEL_MSG = '859819206584959007'
-DEFAULT_CHANNEL_MSG = '862433669322899457'
+DEFAULT_CHANNEL_MSG = '859819206584959007'
+
 
 @bot.event
 async def on_error(event, *args, **kwargs):
