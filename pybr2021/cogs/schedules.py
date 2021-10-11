@@ -118,7 +118,7 @@ class Schedules(commands.Cog):
         await self.sender(bot_msg.buteco)
 
     @tasks.loop(hours=2)
-    async def boteco(self,ctx):
+    async def boteco_loop(self,ctx):
         await self.sender(bot_msg.buteco)
 
     @commands.command(name="hello",brief="Send a hello message")
@@ -128,7 +128,7 @@ class Schedules(commands.Cog):
     @tasks.loop(minutes=15)
     async def hello_loop(self,ctx):
         await self.sender(bot_msg.hello)
-        
+
     async def sender(self,message):
         channel = await self._bot.fetch_channel(DISCORD_MSG_CHANNEL_ID)
         await channel.send(message)
