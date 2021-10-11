@@ -224,10 +224,17 @@ class Greetings(commands.Cog):
             available_channels = 0
 
         logger.info(f"Channels available for authentication. total={available_channels}, online_user={len(online)}, offline_users={len(offline)}")
+        channels_created = 0
         for member in members[:available_channels]:
-            channel = await self.create_user_auth_channel(guild, member)
-            await self.send_auth_instructions(channel, member)
-            logger.info(f"Recreating authication change for user. user={member.name}, channel={channel.name}")
+            try:
+                channel = await self.create_user_auth_channel(guild, member)
+                await self.send_auth_instructions(channel, member)
+                logger.info(f"Recreating authication channel for user. user={member.name}, channel={channel.name}")
+                channels_created += 1
+            except:
+                logger.exception(f"Error recreating authication for user. user={member.name}, channel={channel.name}")
+
+        await logchannel(self.bot, f"{channels_created} canais criados no credencimento")
 
     def default_permissions_overwrite(self, guild):
         return {
