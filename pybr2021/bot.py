@@ -28,7 +28,6 @@ bot.add_cog(cogs.Schedules(bot))
 
 config_file = toml.load("./config.toml")
 
-
 @bot.event
 async def on_error(event, *args, **kwargs):
     """Don't ignore the error, causing Sentry to capture it."""
@@ -246,9 +245,7 @@ async def config_channels(ctx: commands.Context):
         content=("✅ Canais: Gerais\n✅ Canais: Organização\n✅ Canais: Voluntariado\n")
     )
 
-
-
-@bot.command(name="send-message")
+@bot.command(name="msg",brief="Send a msg to a channel [#channel] [msg]")
 async def sendmsg(ctx, *args):
     if len(args) < 2:
         logger.warning("missing destination message and message")
@@ -288,7 +285,6 @@ async def reset(guild: discord.Guild):
         if not any([role.is_default(), role.is_bot_managed(), role.is_integration()])
     ]
     await asyncio.gather(*roles)
-
 
 if __name__ == "__main__":
     bot.run(DISCORD_TOKEN)

@@ -293,7 +293,7 @@ class Greetings(commands.Cog):
         logger.info(f"No channel available in any of the categories")
         return None
 
-    @commands.command(name="check-eventbrite")
+    @commands.command(name="check-eventbrite",brief="Check if user has eventbrite [email or tickeid]")
     async def check_eventbrite(self, ctx, value):
         profile = self.index.get(value)
         if profile:
