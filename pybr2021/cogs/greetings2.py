@@ -227,8 +227,6 @@ class Greetings2(commands.Cog):
             ))
             return
 
-        guild = await self.get_guild()
-        member = await guild.fetch_member(message.author.id)
         role = await self.get_attendee_role(message.guild)
 
         await member.add_roles(role)
