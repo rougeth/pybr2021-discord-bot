@@ -296,6 +296,22 @@ class Greetings(commands.Cog):
         logger.info(f"No channel available in any of the categories")
         return None
 
+    @commands.command(name="confirmar",brief="")
+    async def confirm_eventbrite(self, ctx, value):
+        if len(ctx.author.roles) != 1:
+            await ctx.message.add_reaction("❌")
+            return
+
+        profile = self.index.get(value)
+        if not profile:
+            await ctx.message.add_reaction("❌")
+            return
+
+        role = await self.get_attendee_role(ctx.guild)
+        await ctx.author.add_roles(role)
+        await ctx.message.delete()
+        await logchannel(self.bot, f"Usuário confirmou inscrição com commando. {ctx.author.mention}")
+
     @commands.command(name="check-eventbrite",brief="Check if user has eventbrite [email or tickeid]")
     async def check_eventbrite(self, ctx, value):
         profile = self.index.get(value)
