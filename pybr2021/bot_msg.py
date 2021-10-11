@@ -83,12 +83,12 @@ hello = """:wave: :wave_tone2: :wave_tone3: :wave_tone4: Olá pessoas! :wave: :w
 Que prazer é ter vocês aqui na nossa #PyBr2021
 Para acessar a grade do evento o link é https://2021.pythonbrasil.org.br/grade
 Cada trilha possui um canal aqui para perguntas e discussões. São eles: 
-trilha-shirley-ann-jackson  - Bdazzled Blue (#475F89) - Iniciante
-trilha-marie-van-brittan-brown - Salmon Pink (#FFA0A0) - Intermediário
-trilha-timnit-gebru  - Mellow Apricot (#FFC778) - Avançado
-trilha-angelica-ross - Little Boy Blue (#619BE2) - Não técnicas 
-seccion-bonnie-prado-pinto  - Cadet Blue (#4FA8AA) - Espanhol
-perguntas-mesas-keynote 
+#trilha-shirley-ann-jackson  - Bdazzled Blue - Iniciante
+#trilha-marie-van-brittan-brown - Salmon Pink - Intermediário
+#trilha-timnit-gebru  - Mellow Apricot - Avançado
+#trilha-angelica-ross - Little Boy Blue - Não técnicas 
+#seccion-bonnie-prado-pinto  - Cadet Blue - Espanhol
+#perguntas-mesas-keynote - Perguntas para Mesas e Keynotes
 
 Os links enviados durante as transmissões em cada trilha estará no canal da trilha.
 Lembrem-se que todo evento está sob o Código de Conduta. E caso você precise entrar em contato com o CoC marque @Código de Conduta 
@@ -97,4 +97,23 @@ Se você precisa falar com a organização, marque @Organização.
 
 Lembrem-se de evitar o flood e boa Python Brasil para todos nós!
 
+"""
+
+hello_es = """:wave: :wave_tone2: :wave_tone3: :wave_tone4: ¡Hola gente! :wave: :wave_tone2: :wave_tone3: :wave_tone4:
+Qué placer es tenerte aquí en nuestro # PyBr2021
+Para acceder a la cuadrícula del evento, el enlace es https://2021.pythonbrasil.org.br/grade
+Cada track tiene un canal para preguntas y discusiones:
+#trilha-shirley-ann-jackson  - Bdazzled Blue - Principiante
+#trilha-marie-van-brittan-brown  - Salmon Pink - Intermedio
+#trilha-angelica-ross  - Albaricoque suave - Avanzado
+#trilha-angelica-ross  - Little Boy Blue - No técnico
+#seccion-bonnie-prado-pinto - Cadet Blue - Español
+#perguntas-mesas-keynote - Preguntas para tablas y Keynotes
+
+Los enlaces enviados durante las transmisiones en cada pista estarán en el canal del track.
+Recuerde que todos los eventos están sujetos al Código de Conducta. Y si necesita ponerse en contacto con el CoC, consulte @root - Código de Conduta
+
+Si necesita hablar con la organización, consulte @Organização .
+
+¡Recuerda evitar hacer flood y les deseamos una buena Python Brazil para todas las personas!
 """

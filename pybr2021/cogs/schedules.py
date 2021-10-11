@@ -28,6 +28,8 @@ class Schedules(commands.Cog):
         self._bot = bot
         self.alerts_type=["talk","closing","keynote","panel","light"]
         self.load_events.start()
+        self.boteco_loop.start()
+        self.hello_loop.start()
 
     @tasks.loop(minutes=60)
     async def load_events(self):
@@ -123,10 +125,12 @@ class Schedules(commands.Cog):
     @commands.command(name="hello",brief="Send a hello message")
     async def hello(self,ctx):
         await self.sender(bot_msg.hello)
+        await self.sender(bot_msg.hello_es)
 
     @tasks.loop(minutes=15)
     async def hello_loop(self,ctx):
         await self.sender(bot_msg.hello)
+        await self.sender(bot_msg.hello_es)
 
     async def sender(self,message):
         channel = await self._bot.fetch_channel(DISCORD_MSG_CHANNEL_ID)
