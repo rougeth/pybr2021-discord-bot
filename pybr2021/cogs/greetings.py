@@ -183,11 +183,6 @@ class Greetings(commands.Cog):
                 warnings_sent += 1
         await logchannel(self.bot, f"{channels_deleted} canais de credenciamento deletados e {warnings_sent} avisos enviados.")
 
-
-    @check_inactivity.before_loop
-    async def before_check_inactivity(self):
-        await self.bot.wait_until_ready()
-
     @tasks.loop(minutes=INACTIVY_MINUTES_CHECK)
     @only_log_exceptions
     async def auth_users(self):
@@ -203,6 +198,7 @@ class Greetings(commands.Cog):
             channel.name for channel in channels
             if channel.category_id in categories
         ]
+        logger.info(f"Total channels in auth category: {len(channels_in_auth_category)}")
 
         members = await guild.fetch_members(limit=None).flatten()
         members = [
@@ -235,6 +231,10 @@ class Greetings(commands.Cog):
                 logger.exception(f"Error recreating authication for user. user={member.name}, channel={channel.name}")
 
         await logchannel(self.bot, f"{channels_created} canais criados no credencimento")
+
+    @check_inactivity.before_loop
+    async def before_check_inactivity(self):
+        await self.bot.wait_until_ready()
 
     def default_permissions_overwrite(self, guild):
         return {
