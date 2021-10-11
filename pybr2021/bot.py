@@ -27,7 +27,6 @@ bot.add_cog(cogs.Greetings(bot))
 bot.add_cog(cogs.Schedules(bot))
 
 config_file = toml.load("./config.toml")
-DEFAULT_CHANNEL_MSG = '859819206584959007'
 
 @bot.event
 async def on_error(event, *args, **kwargs):
