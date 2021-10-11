@@ -23,7 +23,8 @@ DISCORD_TOKEN = config("DISCORD_TOKEN")
 
 bot = commands.Bot(command_prefix="pybr!", intents=discord.Intents.all())
 bot.add_cog(cogs.Reminders(bot))
-bot.add_cog(cogs.Greetings(bot))
+#bot.add_cog(cogs.Greetings(bot))
+bot.add_cog(cogs.Greetings2(bot))
 bot.add_cog(cogs.Schedules(bot))
 
 config_file = toml.load("./config.toml")
@@ -273,7 +274,7 @@ async def sendmsg(ctx, *args):
     message = " ".join(args[1:])
     logger.info(f"message sent. destination={destination}, message={message}")
     await destination.send(message)
-        
+
 async def reset(guild: discord.Guild):
     channels = await guild.fetch_channels()
     await asyncio.gather(*[channel.delete() for channel in channels])
