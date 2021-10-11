@@ -83,11 +83,11 @@ hello = """:wave: :wave_tone2: :wave_tone3: :wave_tone4: Olá pessoas! :wave: :w
 Que prazer é ter vocês aqui na nossa #PyBr2021
 Para acessar a grade do evento o link é https://2021.pythonbrasil.org.br/grade
 Cada trilha possui um canal aqui para perguntas e discussões. São eles: 
-trilha-shirley-ann-jackson  - Bdazzled Blue (#475F89) - Iniciante
-trilha-marie-van-brittan-brown - Salmon Pink (#FFA0A0) - Intermediário
-trilha-timnit-gebru  - Mellow Apricot (#FFC778) - Avançado
-trilha-angelica-ross - Little Boy Blue (#619BE2) - Não técnicas 
-seccion-bonnie-prado-pinto  - Cadet Blue (#4FA8AA) - Espanhol
+#trilha-shirley-ann-jackson  - Bdazzled Blue (#475F89) - Iniciante
+#trilha-marie-van-brittan-brown - Salmon Pink (#FFA0A0) - Intermediário
+#trilha-timnit-gebru  - Mellow Apricot (#FFC778) - Avançado
+#trilha-angelica-ross - Little Boy Blue (#619BE2) - Não técnicas 
+#seccion-bonnie-prado-pinto  - Cadet Blue (#4FA8AA) - Espanhol
 perguntas-mesas-keynote 
 
 Os links enviados durante as transmissões em cada trilha estará no canal da trilha.
