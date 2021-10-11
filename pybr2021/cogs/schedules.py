@@ -15,7 +15,6 @@ CALENDAR_URL='https://www.googleapis.com/calendar/v3/calendars/7siodq5un9gqbqd4m
 CALENDER_TIMEZONE= 'UTC'
 SHOW_TIMEZONE='America/Sao_Paulo'
 DISCORD_MSG_CHANNEL_ID='859819206584959007'  # Python Brasil 2021 > Geral
-DISCORD_MSG_CHANNEL_ID= "890012991469273109"
 
 DATE_FMT = "%d/%m/%Y %H:%M:%S"
 HOUR_FMT = "%H:%M"
@@ -125,7 +124,7 @@ class Schedules(commands.Cog):
     @commands.command(name="hello",brief="Send a hello message")
     async def hello(self,ctx):
         await self.sender(bot_msg.hello)
-        
+
     @tasks.loop(minutes=15)
     async def hello_loop(self):
         await self.sender(bot_msg.hello)
