@@ -188,6 +188,11 @@ class Greetings(commands.Cog):
     async def before_check_inactivity(self):
         await self.bot.wait_until_ready()
 
+    @auth_users.before_loop
+    async def before_auth_users(self):
+        await asyncio.sleep(10) # timer so other tasks can start ok
+        await self.bot.wait_until_ready()
+
     @tasks.loop(minutes=INACTIVY_MINUTES_CHECK)
     @only_log_exceptions
     async def auth_users(self):
@@ -203,6 +208,7 @@ class Greetings(commands.Cog):
             channel.name for channel in channels
             if channel.category_id in categories
         ]
+        logger.info(f"Total channels in auth category: {len(channels_in_auth_category)}")
 
         members = await guild.fetch_members(limit=None).flatten()
         members = [
