@@ -188,7 +188,7 @@ class Greetings(commands.Cog):
     async def before_check_inactivity(self):
         await self.bot.wait_until_ready()
 
-    @tasks.loop(minutes=KICK_MIN)
+    @tasks.loop(minutes=INACTIVY_MINUTES_CHECK)
     @only_log_exceptions
     async def auth_users(self):
         guild = await self.get_guild()
