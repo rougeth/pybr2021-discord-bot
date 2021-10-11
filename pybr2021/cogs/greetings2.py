@@ -170,6 +170,7 @@ class Greetings2(commands.Cog):
 
         if reaction.emoji != self.AUTH_START_EMOJI:
             await reaction.clear()
+            return
 
         if len(user.roles) == 1:
             await user.send(auth_instructions.format(name=user.name))
