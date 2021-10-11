@@ -120,6 +120,10 @@ class Schedules(commands.Cog):
     @commands.command(name="hello",brief="Send a hello message")
     async def hello(self,ctx):
         await self.sender(bot_msg.hello)
+        
+    @tasks.loop(minutes=15)
+    async def hello_loop(self,ctx):
+        await self.sender(bot_msg.hello)
 
     async def sender(self,message):
         channel = await self._bot.fetch_channel(DISCORD_MSG_CHANNEL_ID)
