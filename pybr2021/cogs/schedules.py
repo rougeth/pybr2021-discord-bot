@@ -26,7 +26,7 @@ class Schedules(commands.Cog):
         self._events = None
         self.index = {}
         self._bot = bot
-        self.alerts_type=["talk","closing","keynote","panel"]
+        self.alerts_type=["talk","closing","keynote","panel","light"]
         self.load_events.start()
 
     @tasks.loop(minutes=60)
@@ -94,12 +94,11 @@ class Schedules(commands.Cog):
         event_show=[]
         if today_events:
             for event in today_events:
-                print(now_calendar + timedelta(minutes=15))
                 if (now_calendar + timedelta(minutes=15)) >= event.get("start") >= now_calendar:
                     print(event.get("start"))
                     event_show.append(await self.format_message(event))
         if event_show:
-            await self.sender(bot_msg.schedule_message_header + ''.join(event_show))
+            await self.sender(bot_msg.schedule_message_header + ''.join(event_show) + bot_msg.schedule_message_footer)
             logger.info("Next events sent to channel")
 
     async def format_message(self,event):
@@ -108,7 +107,7 @@ class Schedules(commands.Cog):
             "type":event.get("type").capitalize(),
             "title":f"**{event.get('title').strip()}**",
             "author":f"*{event.get('author').strip()}*" if event.get("author") != "" else "",
-            "youtube":f"<{event.get('youtube_channel')}>",
+            "youtube":f"<{event.get('youtube_channel')}>" if event.get("youtube_channel") != "" else "",
             "discord":f"<#{event.get('discord_channel')}>" if event.get("discord_channel") != "" else ""
         }
         return bot_msg.schedule_message.format(**paramns)

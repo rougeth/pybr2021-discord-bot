@@ -53,11 +53,13 @@ Llamo la @organização para ayudarte.
 
 schedule_message_header = """
 :exclamation::exclamation::exclamation::clock1: **Veja o que vai vai rolar na Programação da Python Brasil ainda hoje** :clock1::exclamation::exclamation::exclamation:
-
 """
 
-schedule_message = """{type} - {hour} - {discord} {youtube} :
+schedule_message = """{type} - {hour} {discord} {youtube}
         - {title} - {author}
+"""
+
+schedule_message_footer = """:calendar: Você pode ver a grade completa em https://2021.pythonbrasil.org.br/grade
 """
 
 buteco = """
