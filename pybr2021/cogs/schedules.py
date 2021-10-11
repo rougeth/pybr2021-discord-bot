@@ -117,7 +117,7 @@ class Schedules(commands.Cog):
     async def boteco(self,ctx):
         await self.sender(bot_msg.buteco)
 
-    @tasks.loop(minutes=30)
+    @tasks.loop(hours==2)
     async def boteco_loop(self):
         await self.sender(bot_msg.buteco)
 
@@ -125,7 +125,7 @@ class Schedules(commands.Cog):
     async def hello(self,ctx):
         await self.sender(bot_msg.hello)
 
-    @tasks.loop(minutes=15)
+    @tasks.loop(minutes=30)
     async def hello_loop(self):
         await self.sender(bot_msg.hello)
 
