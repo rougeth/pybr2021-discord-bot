@@ -248,7 +248,7 @@ class Greetings2(commands.Cog):
         await self.invite_tracker.sync()
         logger.info(f"Invite tracker synced. invites={self.invite_tracker.invites!r}")
 
-    @commands.command(name="confirmar2",brief="")
+    @commands.command(name="confirmar",brief="")
     async def confirm_eventbrite(self, ctx, value):
         if len(ctx.author.roles) != 1:
             await ctx.message.add_reaction("❌")
