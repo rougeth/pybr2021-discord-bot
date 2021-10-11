@@ -53,8 +53,26 @@ Llamo la @organização para ayudarte.
 
 schedule_message_header = """
 :exclamation::exclamation::exclamation::clock1: **Veja o que vai vai rolar na Programação da Python Brasil ainda hoje** :clock1::exclamation::exclamation::exclamation:
+
 """
 
-schedule_message = """{type} - {hour} - {title} {author}
-{discord} {youtube}
+schedule_message = """{type} - {hour} - {discord} {youtube} :
+        - {title} - {author}
+"""
+
+buteco = """
+:beer::beer::beer: Alou @everyone !!!
+Passando para lembrar que temos nosso Buteco 
+Lá é possível criar salas de áudio para conversar e ouvir um som !!
+Basta ir ao <#859515528329953290> para criar uma sala de audio !
+No <#896527406037336075> você pode pedir para uns dos nosso 3 bots tocar algumas músicas para vocês,
+Ou só chamar quem quiser para quela conversa de corredor de evento (ou de bar pós-evento !!)
+Não se esqueça de algumas dicas e regras:
+    *  Apenas 25 pessoas podem usar canais com cameras ou trasmissão de tela 
+    *  Cuidado para isso não limitar o acesso a sua sala
+    *  Lembre-se de respeitar todas as pessoas que estiverem na sala
+    *  Somos um eventos com pessoas diversas, respeite a diversidade de cada um.
+    *  Recomendamos que ter seu nome de usuário e foto para que as pessoas possam saber como se referir a você.
+:warning:Lembre-se, TODOS os canais devem seguir o nosso CDC https://python.org.br/cdc/
+:beer::beer::beer: E Divirtam-se :beer::beer::beer:
 """

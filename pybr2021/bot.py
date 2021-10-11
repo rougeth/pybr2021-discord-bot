@@ -22,12 +22,13 @@ if SENTRY_TOKEN:
 DISCORD_TOKEN = config("DISCORD_TOKEN")
 
 bot = commands.Bot(command_prefix="pybr!", intents=discord.Intents.all())
-bot.add_cog(cogs.Reminders(bot))
-bot.add_cog(cogs.Greetings(bot))
+#bot.add_cog(cogs.Reminders(bot))
+#bot.add_cog(cogs.Greetings(bot))
 bot.add_cog(cogs.Schedules(bot))
 
 config_file = toml.load("./config.toml")
-
+#DEFAULT_CHANNEL_MSG = '859819206584959007'
+DEFAULT_CHANNEL_MSG = '862433669322899457'
 
 @bot.event
 async def on_error(event, *args, **kwargs):
@@ -246,9 +247,11 @@ async def config_channels(ctx: commands.Context):
         content=("✅ Canais: Gerais\n✅ Canais: Organização\n✅ Canais: Voluntariado\n")
     )
 
+@bot.command(name="boteco",brief="Send a remember to use buteco")
+async def boteco(ctx):
+    await sender(bot_msg.buteco)
 
-
-@bot.command(name="send-message")
+@bot.command(name="msg",brief="Send a msg to a channel [#channel] [msg]")
 async def sendmsg(ctx, *args):
     if len(args) < 2:
         logger.warning("missing destination message and message")
@@ -289,6 +292,9 @@ async def reset(guild: discord.Guild):
     ]
     await asyncio.gather(*roles)
 
+async def sender(message):
+    channel = await bot.fetch_channel(DEFAULT_CHANNEL_MSG)
+    await channel.send(message)
 
 if __name__ == "__main__":
     bot.run(DISCORD_TOKEN)

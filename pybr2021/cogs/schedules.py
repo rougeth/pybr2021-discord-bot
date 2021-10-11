@@ -1,8 +1,8 @@
 import asyncio
 import datetime
+from collections import defaultdict
 from datetime import datetime, timedelta
 from pprint import pprint
-from collections import defaultdict
 
 import bot_msg
 import httpx
@@ -14,7 +14,9 @@ from pytz import timezone
 CALENDAR_URL='https://www.googleapis.com/calendar/v3/calendars/7siodq5un9gqbqd4mmgf2poiqs@group.calendar.google.com/events?key=AIzaSyAIn8DyZFtthupLozgwIX3NUURFMWEIPb4&timeMin=2021-10-11T00:00:00.000Z&timeMax=2021-10-18T00:00:00.000Z&singleEvents=true&maxResults=9999&timeZone=UTC'
 CALENDER_TIMEZONE= 'UTC'
 SHOW_TIMEZONE='America/Sao_Paulo'
-DISCORD_MSG_CHANNEL_ID='859819206584959007'  # Python Brasil 2021 > Geral
+#DISCORD_MSG_CHANNEL_ID='859819206584959007'  # Python Brasil 2021 > Geral
+DISCORD_MSG_CHANNEL_ID = '862433669322899457'
+
 DATE_FMT = "%d/%m/%Y %H:%M:%S"
 HOUR_FMT = "%H:%M"
 class Schedules(commands.Cog):
@@ -76,7 +78,7 @@ class Schedules(commands.Cog):
                     return await self.http_get_json(semaphore, client, url, retry - 1)
                 logger.exception("Erro")
 
-    @commands.command(name="next-talks")
+    @commands.command(name="next-talks",brief="Send a remember of next calls")
     async def next_events_manual(self,ctx):
         await self.send_next_events()
 
@@ -92,7 +94,9 @@ class Schedules(commands.Cog):
         event_show=[]
         if today_events:
             for event in today_events:
+                print(now_calendar + timedelta(minutes=15))
                 if (now_calendar + timedelta(minutes=15)) >= event.get("start") >= now_calendar:
+                    print(event.get("start"))
                     event_show.append(await self.format_message(event))
         if event_show:
             await self.send_event(bot_msg.schedule_message_header + ''.join(event_show))
@@ -102,10 +106,10 @@ class Schedules(commands.Cog):
         paramns = {
             "hour":event.get("start").astimezone(timezone(event.get("timezone"))).strftime(HOUR_FMT),
             "type":event.get("type").capitalize(),
-            "title":f"**{event.get('title')}**",
-            "author":f" - *{event.get('author')}*" if event.get("author") != "" else "",
-            "youtube":f" - <{event.get('youtube_channel')}>",
-            "discord":f" - <{event.get('discord_channel')}>" if event.get("discord_channel") != "" else ""
+            "title":f"**{event.get('title').strip()}**",
+            "author":f"*{event.get('author').strip()}*" if event.get("author") != "" else "",
+            "youtube":f"<{event.get('youtube_channel')}>",
+            "discord":f"<#{event.get('discord_channel')}>" if event.get("discord_channel") != "" else ""
         }
         return bot_msg.schedule_message.format(**paramns)
 
