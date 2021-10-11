@@ -15,7 +15,7 @@ CALENDAR_URL='https://www.googleapis.com/calendar/v3/calendars/7siodq5un9gqbqd4m
 CALENDER_TIMEZONE= 'UTC'
 SHOW_TIMEZONE='America/Sao_Paulo'
 DISCORD_MSG_CHANNEL_ID='859819206584959007'  # Python Brasil 2021 > Geral
-
+DISCORD_MSG_CHANNEL_ID= "890012991469273109"
 
 DATE_FMT = "%d/%m/%Y %H:%M:%S"
 HOUR_FMT = "%H:%M"
@@ -119,18 +119,16 @@ class Schedules(commands.Cog):
         await self.sender(bot_msg.buteco)
 
     @tasks.loop(hours=2)
-    async def boteco_loop(self,ctx):
+    async def boteco_loop(self):
         await self.sender(bot_msg.buteco)
 
     @commands.command(name="hello",brief="Send a hello message")
     async def hello(self,ctx):
         await self.sender(bot_msg.hello)
-        await self.sender(bot_msg.hello_es)
-
+        
     @tasks.loop(minutes=15)
-    async def hello_loop(self,ctx):
+    async def hello_loop(self):
         await self.sender(bot_msg.hello)
-        await self.sender(bot_msg.hello_es)
 
     async def sender(self,message):
         channel = await self._bot.fetch_channel(DISCORD_MSG_CHANNEL_ID)
