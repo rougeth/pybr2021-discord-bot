@@ -15,6 +15,9 @@ CALENDAR_URL='https://www.googleapis.com/calendar/v3/calendars/7siodq5un9gqbqd4m
 CALENDER_TIMEZONE= 'UTC'
 SHOW_TIMEZONE='America/Sao_Paulo'
 DISCORD_MSG_CHANNEL_ID='859819206584959007'  # Python Brasil 2021 > Geral
+DISCORD_MSG_DEV_CHANNEL_ID="890012991469273109" # Python Brasil 2021 > testes
+
+ENV = config("ENV", default="PROD")
 
 DATE_FMT = "%d/%m/%Y %H:%M:%S"
 HOUR_FMT = "%H:%M"
@@ -26,9 +29,13 @@ class Schedules(commands.Cog):
         self.index = {}
         self._bot = bot
         self.alerts_type=["talk","closing","keynote","panel","light"]
+        self._first_loop=True
         self.load_events.start()
-        #self.boteco_loop.start()
-        #self.hello_loop.start()
+        self.next_events.start()
+        self.boteco_loop.start()
+        self.hello_loop.start()
+        self.first_loop.start()
+     
 
     @tasks.loop(minutes=60)
     async def load_events(self):
@@ -85,19 +92,25 @@ class Schedules(commands.Cog):
 
     @tasks.loop(minutes=15)
     async def next_events(self):
-        await self.send_next_events()
-
+        if not self._first_loop:
+            logger.info("Send mext events")
+            await self.send_next_events()
+            
     async def send_next_events(self):
         logger.info("Sending Schedules to channel")
-        now_calendar = datetime.now().replace(tzinfo=timezone(CALENDER_TIMEZONE))
+        #now_calendar = datetime.now().replace(tzinfo=timezone(CALENDER_TIMEZONE))
+        now_calendar = datetime(2021,10,12,18,0,0).replace(tzinfo=timezone(CALENDER_TIMEZONE))
+        logger.info(f"Check events on {now_calendar}")
         today_events = self.index.get(now_calendar.date(),[])
+        logger.info(f"Today events {len(today_events)}")
         today_events = sorted(today_events, key=lambda itens: itens['start'])
         event_show=[]
         if today_events:
             for event in today_events:
                 if (now_calendar + timedelta(minutes=15)) >= event.get("start") >= now_calendar:
-                    print(event.get("start"))
+                    logger.info(f"Add evento do show {event.get('title')}") 
                     event_show.append(await self.format_message(event))
+        logger.info(f"Events to show {len(event_show)}")
         if event_show:
             await self.sender(bot_msg.schedule_message_header + ''.join(event_show) + bot_msg.schedule_message_footer)
             logger.info("Next events sent to channel")
@@ -117,9 +130,15 @@ class Schedules(commands.Cog):
     async def boteco(self,ctx):
         await self.sender(bot_msg.buteco)
 
+    @tasks.loop(minutes=9999)
+    async def first_loop(self):
+        self._first_loop = False
+
     @tasks.loop(hours=2)
     async def boteco_loop(self):
-        await self.sender(bot_msg.buteco)
+        if not self._first_loop:
+            logger.info("Send Boteco Message")
+            await self.sender(bot_msg.buteco)
 
     @commands.command(name="hello",brief="Send a hello message")
     async def hello(self,ctx):
@@ -127,8 +146,15 @@ class Schedules(commands.Cog):
 
     @tasks.loop(minutes=30)
     async def hello_loop(self):
-        await self.sender(bot_msg.hello)
+        if not self._first_loop:
+            logger.info("Send hello message")
+            await self.sender(bot_msg.hello)
 
     async def sender(self,message):
-        channel = await self._bot.fetch_channel(DISCORD_MSG_CHANNEL_ID)
+        channel = await self._bot.fetch_channel(self.get_txt_channel())
         await channel.send(message)
+
+    def get_txt_channel(self):
+        if ENV == "DEV":
+            return DISCORD_MSG_DEV_CHANNEL_ID  
+        return DISCORD_MSG_CHANNEL_ID
