@@ -98,8 +98,7 @@ class Schedules(commands.Cog):
             
     async def send_next_events(self):
         logger.info("Sending Schedules to channel")
-        #now_calendar = datetime.now().replace(tzinfo=timezone(CALENDER_TIMEZONE))
-        now_calendar = datetime(2021,10,12,18,0,0).replace(tzinfo=timezone(CALENDER_TIMEZONE))
+        now_calendar = datetime.now().replace(tzinfo=timezone(CALENDER_TIMEZONE))
         logger.info(f"Check events on {now_calendar}")
         today_events = self.index.get(now_calendar.date(),[])
         logger.info(f"Today events {len(today_events)}")
