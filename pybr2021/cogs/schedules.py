@@ -143,7 +143,7 @@ class Schedules(commands.Cog):
     async def hello(self,ctx):
         await self.sender(bot_msg.hello)
 
-    @tasks.loop(minutes=30)
+    @tasks.loop(minutes=60)
     async def hello_loop(self):
         if not self._first_loop:
             logger.info("Send hello message")
