@@ -254,7 +254,7 @@ class Greetings2(commands.Cog):
             await ctx.message.add_reaction("❌")
             return
 
-        profile = self.index.get(value)
+        profile = self.search_attendee(value)
         if not profile:
             await ctx.message.add_reaction("❌")
             return
@@ -266,7 +266,7 @@ class Greetings2(commands.Cog):
 
     @commands.command(name="check-eventbrite",brief="Check if user has eventbrite [email or tickeid]")
     async def check_eventbrite(self, ctx, value):
-        profile = self.index.get(value)
+        profile = self.search_attendee(value)
         if profile:
             message = f"`{value}` encotrado.\n```{profile!r}```"
         else:
