@@ -15,7 +15,7 @@ CALENDAR_URL='https://www.googleapis.com/calendar/v3/calendars/7siodq5un9gqbqd4m
 CALENDER_TIMEZONE= 'UTC'
 SHOW_TIMEZONE='America/Sao_Paulo'
 DISCORD_MSG_CHANNEL_ID='859819206584959007'  # Python Brasil 2021 > Geral
-DISCORD_MSG_DEV_CHANNEL_ID="890012991469273109" # Python Brasil 2021 > testes
+DISCORD_MSG_DEV_CHANNEL_ID="890012991469273109" ## Python Brasil 2021 > testes
 
 ENV = config("ENV", default="PROD")
 
@@ -37,7 +37,7 @@ class Schedules(commands.Cog):
         self.first_loop.start()
      
 
-    @tasks.loop(minutes=60)
+    @tasks.loop(minutes=30)
     async def load_events(self):
         logger.info("Loading calendar events.")
         url = CALENDAR_URL
