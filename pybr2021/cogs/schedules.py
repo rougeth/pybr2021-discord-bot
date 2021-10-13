@@ -1,7 +1,7 @@
 import asyncio
 import datetime
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from pprint import pprint
 
 import bot_msg
@@ -19,6 +19,9 @@ DISCORD_MSG_DEV_CHANNEL_ID="890012991469273109" ## Python Brasil 2021 > testes
 
 ENV = config("ENV", default="PROD")
 
+start_hour=""
+end_hour=""
+
 DATE_FMT = "%d/%m/%Y %H:%M:%S"
 HOUR_FMT = "%H:%M"
 class Schedules(commands.Cog):
@@ -31,9 +34,9 @@ class Schedules(commands.Cog):
         self.alerts_type=["talk","closing","keynote","panel","light"]
         self._first_loop=True
         self.load_events.start()
-        self.next_events.start()
-        self.boteco_loop.start()
-        self.hello_loop.start()
+        #self.next_events.start()
+        #self.boteco_loop.start()
+        #self.hello_loop.start()
         self.first_loop.start()
      
 
