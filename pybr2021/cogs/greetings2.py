@@ -54,13 +54,9 @@ async def http_get_json(semaphore, client, url, params, retry=3):
             response = await client.get(url, params=params)
         except httpx.ReadTimeout:
             if retry > 0:
+                await asyncio.sleep(20)
                 return await http_get_json(semaphore, client, url, params, retry - 1)
             logger.exception("Erro")
-
-        if response.status_code != 200:
-            logger.warning(response.json())
-            await asyncio.sleep(20)
-            return await http_get_json(semaphore, client, url, params, retry - 1)
 
         return response.json()
 
