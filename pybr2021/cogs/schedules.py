@@ -34,9 +34,9 @@ class Schedules(commands.Cog):
         self.alerts_type=["talk","closing","keynote","panel","light"]
         self._first_loop=True
         self.load_events.start()
-        #self.next_events.start()
-        #self.boteco_loop.start()
-        #self.hello_loop.start()
+        self.next_events.start()
+        self.boteco_loop.start()
+        self.hello_loop.start()
         self.first_loop.start()
      
 
