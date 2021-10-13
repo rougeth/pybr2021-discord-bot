@@ -77,7 +77,7 @@ schedule_message_footer = """:calendar: Você pode ver a grade completa em https
 """
 
 buteco = """
-:beer::beer::beer: Alou @everyone !!!
+:beer::beer::beer: Alou !!!
 Passando para lembrar que temos nosso Buteco
 Lá é possível criar salas de áudio para conversar e ouvir um som !!
 Basta ir ao <#859515528329953290> para criar uma sala de audio !
