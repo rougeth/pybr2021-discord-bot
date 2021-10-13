@@ -14,13 +14,10 @@ from pytz import timezone
 CALENDAR_URL='https://www.googleapis.com/calendar/v3/calendars/7siodq5un9gqbqd4mmgf2poiqs@group.calendar.google.com/events?key=AIzaSyAIn8DyZFtthupLozgwIX3NUURFMWEIPb4&timeMin=2021-10-11T00:00:00.000Z&timeMax=2021-10-18T00:00:00.000Z&singleEvents=true&maxResults=9999&timeZone=UTC'
 CALENDER_TIMEZONE= 'UTC'
 SHOW_TIMEZONE='America/Sao_Paulo'
-DISCORD_MSG_CHANNEL_ID='859819206584959007'  # Python Brasil 2021 > Geral
-DISCORD_MSG_DEV_CHANNEL_ID="890012991469273109" ## Python Brasil 2021 > testes
+DISCORD_MSG_CHANNEL_ID = config("DISCORD_MSG_CHANNEL_ID","859819206584959007") # Python Brasil 2021 > Geral
 
-ENV = config("ENV", default="PROD")
-
-start_hour=""
-end_hour=""
+START_TIME={"hour":8,"minute":00}
+END_TIME={"hour":22,"minute":00}
 
 DATE_FMT = "%d/%m/%Y %H:%M:%S"
 HOUR_FMT = "%H:%M"
@@ -33,6 +30,7 @@ class Schedules(commands.Cog):
         self._bot = bot
         self.alerts_type=["talk","closing","keynote","panel","light"]
         self._first_loop=True
+        self.parse_start_end()
         self.load_events.start()
         self.next_events.start()
         self.boteco_loop.start()
@@ -95,7 +93,7 @@ class Schedules(commands.Cog):
 
     @tasks.loop(minutes=15)
     async def next_events(self):
-        if not self._first_loop:
+        if await self.run_loop():
             logger.info("Send mext events")
             await self.send_next_events()
             
@@ -138,7 +136,7 @@ class Schedules(commands.Cog):
 
     @tasks.loop(hours=2)
     async def boteco_loop(self):
-        if not self._first_loop:
+        if await self.run_loop():
             logger.info("Send Boteco Message")
             await self.sender(bot_msg.buteco)
 
@@ -148,15 +146,44 @@ class Schedules(commands.Cog):
 
     @tasks.loop(minutes=60)
     async def hello_loop(self):
-        if not self._first_loop:
+        if await self.run_loop():
             logger.info("Send hello message")
             await self.sender(bot_msg.hello)
 
     async def sender(self,message):
-        channel = await self._bot.fetch_channel(self.get_txt_channel())
+        channel = await self._bot.fetch_channel(DISCORD_MSG_CHANNEL_ID)
         await channel.send(message)
 
     def get_txt_channel(self):
-        if ENV == "DEV":
-            return DISCORD_MSG_DEV_CHANNEL_ID  
         return DISCORD_MSG_CHANNEL_ID
+
+    async def run_loop(self):
+        run_loop = self.end_date_utc >= datetime.now().astimezone(tz=timezone('UTC')) >= self.start_date_utc and not self._first_loop
+        logger.info(f"Loop will be run ? {run_loop}")
+        return run_loop
+
+    def parse_start_end(self):
+        logger.info("Parsing Start an End Date")
+        now = datetime.now()
+        start_date={ 
+            "year":now.year,
+            "month":now.month,
+            "day":now.day,
+            **START_TIME,
+        }
+        end_date={ 
+            "year":now.year,
+            "month":now.month,
+            "day":now.day,
+            **END_TIME,
+        }
+        self.start_date = datetime(**start_date).replace(tzinfo=timezone(SHOW_TIMEZONE))
+        self.end_date = datetime(**end_date).replace(tzinfo=timezone(SHOW_TIMEZONE))
+        self.start_date_utc = datetime(**start_date).astimezone(tz=timezone('UTC'))
+        self.end_date_utc = datetime(**end_date).astimezone(tz=timezone('UTC'))
+        logger.info(f"Start Date: UTC:{self.start_date_utc.strftime(DATE_FMT)} -- Local:{self.start_date}")
+        logger.info(f"End Date: UTC:{self.end_date_utc.strftime(DATE_FMT)} -- Local:{self.end_date}")
+
+        
+
+
