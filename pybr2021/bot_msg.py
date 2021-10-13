@@ -73,7 +73,7 @@ schedule_message = """{type} - {hour} {discord} {youtube}
         - {title} - {author}
 """
 
-schedule_message_footer = """:calendar: Você pode ver a grade completa em https://2021.pythonbrasil.org.br/grade
+schedule_message_footer = """:calendar: Perdeu algo ? Tá tudo aqui: https://2021.pythonbrasil.org.br/grade
 """
 
 buteco = """
