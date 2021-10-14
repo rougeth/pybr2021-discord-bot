@@ -129,10 +129,10 @@ class Greetings2(commands.Cog):
         self._index_updated_at = None
         self._atteendee_role = None
         self._attendees = []
-        self.load_indexes.start()
+        #self.load_indexes.start()
 
 
-    @tasks.loop(minutes=1)
+    #@tasks.loop(minutes=1)
     @only_log_exceptions
     async def load_indexes(self):
         new_attendees = await load_attendees(self._index_updated_at)
@@ -154,6 +154,13 @@ class Greetings2(commands.Cog):
         return self._index.get(query.strip().lower())
 
     @commands.Cog.listener()
+    async def on_member_join(self, member: discord.Member):
+        role = await self.get_attendee_role(member.guild)
+        await member.add_roles(role)
+        await logchannel(self.bot, f"✅ atribuí cargo de participante para {member.mention} ")
+
+
+    #@commands.Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction, user: discord.Member):
         """Quando usuário reagir a mensagem no canal de texto #credencimento, o bot enviará
         uma mensagem diretamente para o usuário pedindo email para confirmação.
@@ -184,7 +191,7 @@ class Greetings2(commands.Cog):
             self._guild = await self.bot.fetch_guild(config("DISCORD_GUILD_ID"))
         return self._guild
 
-    @commands.Cog.listener()
+    #@commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         if message.author.bot or message.channel.type != discord.ChannelType.private:
             return
@@ -231,7 +238,7 @@ class Greetings2(commands.Cog):
         await logchannel(self.bot, f"✅\n{member.mention}  confirmou sua inscrição")
         logger.info(f"User authenticated. user={message.author.name}")
 
-    @commands.Cog.listener()
+    #@commands.Cog.listener()
     async def on_ready(self):
         channel = await self.bot.fetch_channel(self.AUTH_CHANNEL_ID)
         await channel.purge()
@@ -244,7 +251,7 @@ class Greetings2(commands.Cog):
         await self.invite_tracker.sync()
         logger.info(f"Invite tracker synced. invites={self.invite_tracker.invites!r}")
 
-    @commands.command(name="confirmar",brief="")
+    #@commands.command(name="confirmar",brief="")
     async def confirm_eventbrite(self, ctx, value):
         if len(ctx.author.roles) != 1:
             await ctx.message.add_reaction("❌")
@@ -260,7 +267,7 @@ class Greetings2(commands.Cog):
         await ctx.message.delete()
         await logchannel(self.bot, f"Usuário confirmou inscrição com commando. {ctx.author.mention}")
 
-    @commands.command(name="check-eventbrite",brief="Check if user has eventbrite [email or tickeid]")
+    #@commands.command(name="check-eventbrite",brief="Check if user has eventbrite [email or tickeid]")
     async def check_eventbrite(self, ctx, value):
         profile = self.search_attendee(value)
         if profile:
