@@ -155,6 +155,10 @@ class Greetings2(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
+        joined_with_invite_code = await self.invite_tracker.check_new_user(member)
+        if joined_with_invite_code:
+            return
+
         role = await self.get_attendee_role(member.guild)
         await member.add_roles(role)
         await logchannel(self.bot, f"✅ atribuí cargo de participante para {member.mention} ")
@@ -238,13 +242,8 @@ class Greetings2(commands.Cog):
         await logchannel(self.bot, f"✅\n{member.mention}  confirmou sua inscrição")
         logger.info(f"User authenticated. user={message.author.name}")
 
-    #@commands.Cog.listener()
+    @commands.Cog.listener()
     async def on_ready(self):
-        channel = await self.bot.fetch_channel(self.AUTH_CHANNEL_ID)
-        await channel.purge()
-        message = await channel.send(auth_welcome.format(self.bot.user.mention))
-        await message.add_reaction(self.AUTH_START_EMOJI)
-
         # Invite Tracker
         guild = await self.get_guild()
         self.invite_tracker = InviteTracker(self.bot, guild, ROLE_INVITE_MAP)
