@@ -30,7 +30,7 @@ class Schedules(commands.Cog):
         self._bot = bot
         self.alerts_type=["talk","closing","keynote","panel","light"]
         self._first_loop=True
-        self.parse_start_end()
+        self.parse_start_end() #todo async
         self.load_events.start()
         self.next_events.start()
         self.boteco_loop.start()
