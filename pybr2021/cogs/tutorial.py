@@ -1,18 +1,12 @@
-import asyncio
+
 import json
 import os
-import pickle
 import shutil
-import time
 from base64 import b64encode
-from datetime import datetime, timedelta
+from datetime import datetime
 from functools import wraps
-from random import shuffle
 
 import discord
-import httpx
-from bot_msg import (auth_already_confirmed, auth_email_not_found,
-                     auth_instructions, auth_welcome)
 from decouple import config
 from discord import message
 from discord.enums import ChannelType
@@ -21,18 +15,8 @@ from discord_setup import get_or_create_channel
 from invite_tracker import InviteTracker
 from loguru import logger
 
-EVENTBRITE_TOKEN = config("EVENTBRITE_TOKEN")
 DISCORD_GUILD_ID = config("DISCORD_GUILD_ID")
 DISCORD_LOG_CHANNEL_ID = config("DISCORD_LOG_CHANNEL_ID")
-DISCORD_GENERAL_INVITE = config("DISCORD_GENERAL_INVITE")
-
-
-ROLE_INVITE_MAP = [
-    ("Ministrantes", ["zuNYMG4jud"]),
-    ("Voluntariado", ["j9YH9BqU"]),
-    ("Patrocinadoras", ["DfgQhYnVxK"]),
-]
-
 
 def only_log_exceptions(function):
     @wraps(function)
@@ -43,82 +27,13 @@ def only_log_exceptions(function):
             logger.exception(f"Error while calling {function!r}")
     return wrapper
 
-
 async def logchannel(bot, message):
     channel = await bot.fetch_channel(DISCORD_LOG_CHANNEL_ID)
     await channel.send(message)
 
-
-# async def http_get_json(semaphore, client, url, params, retry=3):
-#     async with semaphore:
-#         try:
-#             response = await client.get(url, params=params)
-#         except httpx.ReadTimeout:
-#             if retry > 0:
-#                 await asyncio.sleep(20)
-#                 return await http_get_json(semaphore, client, url, params, retry - 1)
-#             logger.exception("Erro")
-
-#         return response.json()
-
-
-# async def load_attendees(updated_at: datetime = None):
-#     default_params = {
-#         "token": EVENTBRITE_TOKEN,
-#         "status": "attending",
-#     }
-#     if updated_at:
-#         updated_at = updated_at.strftime("%Y-%m-%dT%H:%M:%SZ")
-#         default_params["changed_since"] = updated_at
-
-#     url = "https://www.eventbriteapi.com/v3/events/169078058023/attendees/"
-#     semaphore = asyncio.BoundedSemaphore(10)
-#     async with httpx.AsyncClient() as client:
-#         response = await http_get_json(semaphore, client, url, default_params)
-#         if not updated_at:
-#             logger.info(
-#                 "Attendees load initialized. attendees={attendees}, pages={pages}".format(
-#                     attendees=response["pagination"]["object_count"],
-#                     pages=response["pagination"]["page_count"],
-#                 )
-#             )
-
-#         attendees = []
-#         attendees.extend(response["attendees"])
-
-#         tasks = []
-#         page_count = response["pagination"]["page_count"]
-#         for page_number in range(1, page_count + 1):
-#             # I'm not proud of this, but Eventbrite is the one to blame
-#             next_page = json.dumps({"page": page_number})
-
-#             params = default_params.copy()
-#             params["continuation"] = b64encode(next_page.encode("utf-8")).decode(
-#                 "utf-8"
-#             )
-#             tasks.append(http_get_json(semaphore, client, url, params))
-
-#         if tasks:
-#             results = await asyncio.gather(*tasks)
-#             attendees.extend(
-#                 [attendees for result in results for attendees in result["attendees"]]
-#             )
-
-#     return attendees
-
-
-# def create_index(attendees):
-#     index = {}
-#     for attendee in attendees:
-#         profile = attendee["profile"]
-#         index[attendee["order_id"]] = profile
-#         index[profile["email"].lower()] = profile
-#     return index
-
-#"vagas": "25
 MSG="""Tutorial {channel}"""
 TUTORIAIS = [
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Desenhando com Python: programação criativa ao alcance de todas as pessoas", "data_hora":"2021-10-17 10:00:00", "vagas": "5", "ministrantes": ["Alexandre Villares"]},
+    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Desenhando com Python: programação criativa ao alcance de todas as pessoas", "data_hora":"2021-10-17 10:00:00", "vagas": "25", "ministrantes": ["Alexandre Villares"]},
     {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Análise de Datasets Científicos usando Python", "data_hora":"2021-10-17 10:00:00", "vagas": "100", "ministrantes": ["Bruno dos Santos Almeida"]},
     {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "1-Djavue - criando uma aplicação web do zero com Django e Vue.js", "data_hora":"2021-10-17 10:00:00", "vagas": "80", "ministrantes": ["Buser (facilitadora: Renzo Nuccitelli)"]},
     {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "2-Djavue - criando uma aplicação web do zero com Django e Vue.js", "data_hora":"2021-10-17 15:00:00", "vagas": "80", "ministrantes": ["Buser (facilitadora: Renzo Nuccitelli)"]},
@@ -149,6 +64,9 @@ class Tutorial(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self._guild = None
+        self.channel = None
+        self.message = None
+        self.voice = None
         self._allowtouser= False
         self._tutoriais = []
 
@@ -171,31 +89,6 @@ class Tutorial(commands.Cog):
     async def remove_files(self):
         shutil.rmtree("./json/")
 
-    #@commands.Cog.listener()
-    async def on_raw_reaction_add(self, reaction: discord.Reaction, user: discord.Member):
-        """Quando o usuário reagir será inscrito
-        """
-        if (
-            user.bot
-            or reaction.message.channel.id != self.AUTH_CHANNEL_ID
-        ):
-            return
-
-        if reaction.emoji != self.AUTH_START_EMOJI:
-            await reaction.clear()
-            return
-
-        if len(user.roles) == 1:
-            await user.send(auth_instructions.format(name=user.name))
-
-    async def get_attendee_role(self, guild: discord.Guild) -> discord.Role:
-        """Retorna cargo de participante"""
-        if not self._atteendee_role:
-            guild = await self.get_guild()
-            roles = await guild.fetch_roles()
-            self._atteendee_role = discord.utils.get(roles, name=self.ATTENDEES_ROLE_NAME)
-        return self._atteendee_role
-
     async def get_guild(self):
         if not self._guild:
             self._guild = await self.bot.fetch_guild(config("DISCORD_GUILD_ID"))
@@ -207,20 +100,25 @@ class Tutorial(commands.Cog):
         self._allowtouser=False
         await self.remove_files()
         await self.on_ready(True)
+        await logchannel(self.bot,"Resetanto Tutoriais")
     
     @commands.command(name="open",brief="warnig on use that!!")
     async def open(self, ctx):
-        #await self.on_ready()
         self._allowtouser=True
         for tutorial in self._tutoriais:
             await self.lista(tutorial)
+        await self.show_tutoriais()
+        logger.info("Inscrições abertas")
+        await logchannel(self.bot,"Inscrições abertas")
 
     @commands.command(name="close",brief="warnig on use that!!")
     async def close(self, ctx):
-        #await self.on_ready()
         self._allowtouser=False
         for tutorial in self._tutoriais:
             await self.lista(tutorial)
+        await self.show_tutoriais()
+        logger.info("Inscrições fechadas")
+        await logchannel(self.bot,"Inscrições fechadas")
 
     @commands.Cog.listener()
     async def on_ready(self,force_clean=False):
@@ -246,7 +144,10 @@ class Tutorial(commands.Cog):
                             logger.info(f"Apagando {c.name}")
                             await c.delete()
 
-        self._tutoriais = TUTORIAIS[:1]
+        self.channel = await get_or_create_channel(f"tutorial-info", self._guild, position=0, category=organizacao_cat)
+        self.voice=  await get_or_create_channel(f"tutorial-ajuda", self._guild, position=0, category=organizacao_cat,type=discord.ChannelType.voice)
+
+        self._tutoriais = TUTORIAIS
 
         for index,tutorial in enumerate(self._tutoriais):
             tutorial["file_name"]=f"tutorial_{index}_file.json"
@@ -263,8 +164,30 @@ class Tutorial(commands.Cog):
 
             self._tutoriais[index] = tutorial
 
+        await self.show_tutoriais()
         logger.info("Canais criados com sucesso")
-        
+        await logchannel(self.bot,"Canais criados com sucesso")
+
+    async def show_tutoriais(self):
+
+        await self.clear(self.channel.id)
+        msg=""
+        msg+="\n:exclamation::exclamation: AQUI ESTÃO OS TUTORIAIS DA PYTHON BRASIL 2021 :exclamation::exclamation:"
+        msg+="\n:exclamation::exclamation: MAIS INFORMAÇÕES CLICANDO NO LINK DE CADA CANAL :exclamation::exclamation:"
+        msg+="\n:exclamation::exclamation: APENAS 1 INSCRIÇÃO POR PESSOA NO MESMO HORÁRIO (SERÃO VALIDADAS PELO ORG!!) :exclamation::exclamation:"
+        msg+="\n:red_circle: INSCRIÇÕES FECHADAS :red_circle:\n\n\n" if not self._allowtouser else "\n:green_circle: INSCRIÇÕES ABERTAS :green_circle:\n\n\n"
+        msg+=""
+        await self.channel.send(msg)
+
+        tutorias_msg=":diamond_shape_with_a_dot_inside: {nome}\n     :writing_hand_tone4: <#{canal}> :calendar: {data} :school: {i}/{total}"
+        for tutorial  in self._tutoriais:
+            canal = self.bot.get_channel(tutorial["channel"])
+            nome = tutorial["nome"]
+            i= tutorial['inscritos']
+            total = tutorial['vagas']
+            data = datetime.strptime(tutorial['data_hora'],'%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y-%H:%M')
+            await self.channel.send(tutorias_msg.format(nome=nome,data=data,canal=canal.id,i=i,total=total))
+
 
     async def clear(self,channel):
         channel_msg = self.bot.get_channel(channel)
@@ -279,7 +202,6 @@ class Tutorial(commands.Cog):
             return
 
         for index,tutorial in enumerate(self._tutoriais):
-            logger.info(f"Loop Tutoriais {tutorial}")
             channel = self.bot.get_channel(tutorial["channel"])
             if message.channel.id == channel.id:
                 if not self._allowtouser:
@@ -294,6 +216,7 @@ class Tutorial(commands.Cog):
                         return  
 
                     logger.info(f"Cadastrando usuário {message.author.name}")
+                    await logchannel(self.bot,f"Cadastrando usuário {message.author.name} em {tutorial['nome']}")
                     tutorial['inscritos']+=1
                     tutorial["userinscritos"].append(message.author.id)
                     logger.info(tutorial)
@@ -304,6 +227,7 @@ class Tutorial(commands.Cog):
                 
                     if message.author.id in tutorial["userinscritos"]:
                         logger.info(f"Removendo usuário {message.author.name}")
+                        await logchannel(self.bot,f"Removendo usuário {message.author.name} em {tutorial['nome']}")
                         tutorial['inscritos']-=1
                         tutorial["userinscritos"].remove(message.author.id)
                         await self.save_list(tutorial)
@@ -311,88 +235,29 @@ class Tutorial(commands.Cog):
 
                 await message.delete()
                 await self.lista(tutorial)
+                await self.show_tutoriais()
 
     async def lista(self,tutorial,init=False):
         channel = self.bot.get_channel(tutorial["channel"])
 
         msg=""
-        msg+="### INSCRIÇÕES FECHADAS ###" if not self._allowtouser else "### INSCRIÇÕES ABERTAS ###\n### DIGITE a palavra 'entrar' para sua inscrição ou 'sair' para remover sua inscrição ###"
-        msg+= f"\n{MSG.format(channel=tutorial['nome'])}"
-        msg+= f"\nDia e Hora: {datetime.strptime(tutorial['data_hora'],'%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y %H:%M:%S')}"  
+        msg+=":red_circle: INSCRIÇÕES FECHADAS :red_circle:" if not self._allowtouser else ":green_circle: INSCRIÇÕES ABERTAS :green_circle:\n:keyboard DIGITE a palavra 'entrar' para sua inscrição ou 'sair' para remover sua inscrição :keyboard:"
+        msg+= f"\n:diamond_shape_with_a_dot_inside: {MSG.format(channel=tutorial['nome'])}"
+        msg+= f"\n:calendar: Dia e Hora: {datetime.strptime(tutorial['data_hora'],'%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y %H:%M')}"  
         for ministrante in tutorial['ministrantes']:
-            msg+=f"\nMinistrante: {ministrante}"
+            msg+=f"\n:teacher_tone5: Ministrante: {ministrante}"
 
-        msg+= f"\nLista de Inscritos {tutorial['inscritos']}/{tutorial['vagas']}"
+        msg+= f"\n:student_tone5: Lista de Inscritos {tutorial['inscritos']}/{tutorial['vagas']}"
         for item in tutorial['userinscritos']:
             msg+=f"\n<@{item}>"
         
         if tutorial['inscritos'] == tutorial['vagas']:
-            msg+="\nTUTORIAL **LOTADO**"
+            msg+="\n:octagonal_sign:  TUTORIAL **LOTADO** :octagonal_sign:"
         else:
-            msg+="\nCOM VAGAS"
+            msg+="\n:grey_exclamation: COM VAGAS :grey_exclamation: "
 
         if not init: 
             message= await channel.fetch_message(tutorial["inscritos_msg"])
             await message.edit(content=msg) 
             return
-        logger.info(msg)
         return await channel.send(msg)
-
-           
-            #await message.channel.send(f"comandos aceitos:entrar,sair,lista")
-
-            #await message.channel.send(f"comandos aceitos:entrar,sair,lista")
-        # profile = self.search_attendee(message.content)
-        # if not profile:
-        #     logger.info(
-        #         f"User not found on index. user_id={message.author.id}, content={message.content!r}"
-        #     )
-        #     await message.add_reaction("❌")
-        #     await message.author.send(auth_email_not_found.format(query=message.content))
-        #     await logchannel(self.bot, (
-        #         f"❌\nInscrição não encontrada - {message.author.mention}"
-        #         f"\n`{message.content}`"
-        #     ))
-        #     return
-
-        # role = await self.get_attendee_role(message.guild)
-
-        # await member.add_roles(role)
-        # await message.add_reaction("✅")
-        # await member.send(DISCORD_GENERAL_INVITE)
-        # await logchannel(self.bot, f"✅\n{member.mention}  confirmou sua inscrição")
-        # logger.info(f"User authenticated. user={message.author.name}")
-
-    # @commands.Cog.listener()
-    # async def on_ready(self):
-    #     # Invite Tracker
-    #     guild = await self.get_guild()
-    #     self.invite_tracker = InviteTracker(self.bot, guild, ROLE_INVITE_MAP)
-    #     await self.invite_tracker.sync()
-    #     logger.info(f"Invite tracker synced. invites={self.invite_tracker.invites!r}")
-
-    # #@commands.command(name="confirmar",brief="")
-    # async def confirm_eventbrite(self, ctx, value):
-    #     if len(ctx.author.roles) != 1:
-    #         await ctx.message.add_reaction("❌")
-    #         return
-
-    #     profile = self.search_attendee(value)
-    #     if not profile:
-    #         await ctx.message.add_reaction("❌")
-    #         return
-
-    #     role = await self.get_attendee_role(ctx.guild)
-    #     await ctx.author.add_roles(role)
-    #     await ctx.message.delete()
-    #     await logchannel(self.bot, f"Usuário confirmou inscrição com commando. {ctx.author.mention}")
-
-    # #@commands.command(name="check-eventbrite",brief="Check if user has eventbrite [email or tickeid]")
-    # async def check_eventbrite(self, ctx, value):
-    #     profile = self.search_attendee(value)
-    #     if profile:
-    #         message = f"`{value}` encotrado.\n```{profile!r}```"
-    #     else:
-    #         message = f"`{value}` não encotrado."
-
-    #     await ctx.channel.send(message)
