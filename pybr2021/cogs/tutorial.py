@@ -226,7 +226,7 @@ class Tutorial(commands.Cog):
                         for c  in cat.channels:
                             await c.delete()
 
-        for index,tutorial in enumerate(TUTORIAIS):
+        for index,tutorial in enumerate(TUTORIAIS[:2]):
             tutorial["file_name"]=f"tutorial_{index}_file.pkl"
             await self.load_list(tutorial)
             await logchannel(self.bot, f"Carregando tutorial-{index}:{tutorial.get('nome')[:20]}")
