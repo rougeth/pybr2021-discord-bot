@@ -274,7 +274,7 @@ class Tutorial(commands.Cog):
 
     async def lista(self,tutorial,init=False):
         msg = f"{MSG.format(channel=tutorial['nome'])}"
-        msg+= f"\Dia e Hora: {tutorial['data_hora']}"
+        msg+= f"\nDia e Hora: {tutorial['data_hora']}"
         for ministrante in tutorial['ministrantes']:
             msg+=f"\nMinistrante: {ministrante}"
 
