@@ -2,6 +2,7 @@ import asyncio
 import json
 import os
 import pickle
+import shutil
 import time
 from base64 import b64encode
 from datetime import datetime, timedelta
@@ -162,7 +163,9 @@ class Tutorial(commands.Cog):
             tutorial['userinscritos']=[]
             tutorial['inscritos']=0
             await self.save_list(tutorial)
-        
+
+    async def remove_files(self):
+        shutil.rmtree("./pickles/")
 
     #@commands.Cog.listener()
     async def on_raw_reaction_add(self, reaction: discord.Reaction, user: discord.Member):
@@ -194,9 +197,10 @@ class Tutorial(commands.Cog):
             self._guild = await self.bot.fetch_guild(config("DISCORD_GUILD_ID"))
         return self._guild
 
-    @commands.command(name="tutoriais-relauch",brief="")
+    @commands.command(name="tutoriais-reset",brief="warnig on use that!!")
     async def on_ready(self, ctx):
         self._allowtouser=False
+        await self.remove_files()
         await self.on_ready(True)
 
     @commands.Cog.listener()
@@ -242,22 +246,28 @@ class Tutorial(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        
+        logger.info("Validando mensagem")
         if message.author.bot or message.channel.type == discord.ChannelType.private or not self._allowtouser:
+            logger.info("Mensagem de bot ou privada")
             return
 
         if not self._allowtouser:
+            logger.info("Sem permissão de escrita ainda")
             await message.delete()
             return
 
         for index,tutorial in enumerate(TUTORIAIS):
+            logger.info("Loop Tutorias")
             if message.channel.id == tutorial["channel"]:
+                logger.info(f"Mensagem dentro de canal {message.channel.name}")
                 if message.content.lower() == "entrar":
                     if message.author.id in tutorial["userinscritos"]:
+                        logger.info(f"Usuário já cadastrado {message.author.name}")
                         await message.delete()
                         await self.lista(tutorial)
                         return  
 
+                    logger.info(f"Cadastrando usuário {message.author.name}")
                     tutorial['inscritos']+=1
                     tutorial["userinscritos"].append(message.author.id)
                     await self.save_list(tutorial)
@@ -265,6 +275,7 @@ class Tutorial(commands.Cog):
                 if message.content.lower() == "sair":
                 
                     if message.author.id in tutorial["userinscritos"]:
+                        logger.info(f"Removendo usuário {message.author.name}")
                         tutorial['inscritos']-=1
                         tutorial["userinscritos"].remove(message.author.id)
                         await self.save_list(tutorial)
