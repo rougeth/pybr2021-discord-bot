@@ -186,7 +186,7 @@ class Tutorial(commands.Cog):
         msg+=""
         await self.channel.send(msg)
 
-        tutorias_msg=":diamond_shape_with_a_dot_inside: {nome}\n     :writing_hand_tone4: <#{canal}> :calendar: {data} :school: {i}/{total}"
+        tutorias_msg=":diamond_shape_with_a_dot_inside: {nome}\n     :writing_hand_tone4: <#{canal}> :calendar: {data}"
         for tutorial  in self._tutoriais:
             canal = self.bot.get_channel(tutorial["channel"])
             nome = tutorial["nome"]
@@ -242,13 +242,13 @@ class Tutorial(commands.Cog):
 
                 await message.delete()
                 await self.lista(tutorial)
-                await self.show_tutoriais()
+                #await self.show_tutoriais()
 
     async def lista(self,tutorial,init=False):
         channel = self.bot.get_channel(tutorial["channel"])
 
         msg=""
-        msg+=":red_circle: INSCRIÇÕES FECHADAS :red_circle:" if not self._allowtouser else ":green_circle: INSCRIÇÕES ABERTAS :green_circle:\n:keyboard DIGITE a palavra 'entrar' para sua inscrição ou 'sair' para remover sua inscrição :keyboard:"
+        msg+=":red_circle: INSCRIÇÕES FECHADAS :red_circle:" if not self._allowtouser else ":green_circle: INSCRIÇÕES ABERTAS :green_circle:\n:keyboard: DIGITE a palavra 'entrar' para sua inscrição ou 'sair' para remover sua inscrição :keyboard:"
         msg+= f"\n:diamond_shape_with_a_dot_inside: {MSG.format(channel=tutorial['nome'])}"
         msg+= f"\n:calendar: Dia e Hora: {datetime.strptime(tutorial['data_hora'],'%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y %H:%M')}"  
         for ministrante in tutorial['ministrantes']:
