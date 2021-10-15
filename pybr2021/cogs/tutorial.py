@@ -231,6 +231,7 @@ class Tutorial(commands.Cog):
             await self.load_list(tutorial)
             await logchannel(self.bot, f"Carregando tutorial-{index}:{tutorial.get('nome')[:20]}")
             tutorial["channel"] = await get_or_create_channel(f"tutorial-{index}-chat", self._guild, position=99, category=organizacao_cat)
+            logger.info(tutorial["channel"])
             tutorial["voice"] = await get_or_create_channel(f"tutorial-{index}-voice", self._guild, position=99, category=organizacao_cat,type=discord.ChannelType.voice)
             await self.clear(tutorial["channel"])
             logger.info(tutorial)
