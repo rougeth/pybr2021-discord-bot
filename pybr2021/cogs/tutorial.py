@@ -203,7 +203,7 @@ class Tutorial(commands.Cog):
 
         for index,tutorial in enumerate(self._tutoriais):
             channel = self.bot.get_channel(tutorial["channel"])
-            if message.channel.id == channel.id:
+            if message.channel.id == channel.id and channel.id:
                 if not self._allowtouser:
                     await message.delete()
                     return
