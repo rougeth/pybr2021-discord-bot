@@ -259,7 +259,7 @@ class Tutorial(commands.Cog):
 
         for index,tutorial in enumerate(TUTORIAIS):
             logger.info("Loop Tutorias")
-            if message.channel.id == tutorial["channel"]:
+            if message.channel.id == tutorial["channel"].id:
                 logger.info(f"Mensagem dentro de canal {message.channel.name}")
                 if message.content.lower() == "entrar":
                     if message.author.id in tutorial["userinscritos"]:
