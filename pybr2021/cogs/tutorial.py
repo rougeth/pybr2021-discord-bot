@@ -48,13 +48,13 @@ TUTORIAIS = [
     {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Python para microcontroladores com MicroPython", "data_hora":"2021-10-17 10:00:00", "vagas": "10", "ministrantes": ["Gabriel Aragão"]},
     {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Python Geoespacial: automatizando processos de GIS e Sensoriamento Remoto com pacotes abertos em python", "data_hora":"2021-10-17 15:00:00", "vagas": "15", "ministrantes": ["Guilherme Iablonovski"]},
     {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Viajando por uma API protegida: Implementando uma API com Flask", "data_hora":"2021-10-16 10:00:00", "vagas": "30", "ministrantes": ["Jessica Temporal"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Expectativas nem sempre machucam - Criando expectativas para os seus dados com Great Expectations.", "data_hora":"2021-10-17 15:00:00", "vagas": "20", "ministrantes": ["Joamila Brito"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Analisando 250GB em segundos usando Python e a Base dos Dados", "data_hora":"2021-10-17 10:00:00", "vagas": "10", "ministrantes": ["João Carabetta"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Criando um jogo de plataforma com Pygame do zero", "data_hora":"2021-10-17 10:00:00", "vagas": "12", "ministrantes": ["João JS Bueno"]},
+    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Expectativas nem sempre machucam - Criando expectativas para os seus dados com Great Expectations.", "data_hora":"2021-10-16 15:00:00", "vagas": "20", "ministrantes": ["Joamila Brito"]},
+    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Analisando 250GB em segundos usando Python e a Base dos Dados", "data_hora":"2021-10-16 10:00:00", "vagas": "10", "ministrantes": ["João Carabetta"]},
+    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Criando um jogo de plataforma com Pygame do zero", "data_hora":"2021-10-16 10:00:00", "vagas": "12", "ministrantes": ["João JS Bueno"]},
     {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Python para Dashboards", "data_hora":"2021-10-17 15:00:00", "vagas": "30", "ministrantes": ["Jose Edivaldo da Silva Junior"]},
     {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Airflow na Pratica", "data_hora":"2021-10-16 10:00:00", "vagas": "40", "ministrantes": ["JusBrasil (facilitador: Tarsis)"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Anatomia de um interpretador Lisp em Python", "data_hora": "2011-10-17 15:00:00", "vagas": "30", "ministrantes": ["Luciano Ramalho"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Construindo API's robustas utilizando Python", "data_hora":"2021-10-17 15:00:00", "vagas": "30", "ministrantes": ["Luizalabs (facilitador: Cassio Botaro)"]},
+    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Anatomia de um interpretador Lisp em Python", "data_hora": "2011-10-16 15:00:00", "vagas": "30", "ministrantes": ["Luciano Ramalho"]},
+    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Construindo API's robustas utilizando Python", "data_hora":"2021-10-16 15:00:00", "vagas": "30", "ministrantes": ["Luizalabs (facilitador: Cassio Botaro)"]},
     {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "As luas de Jupyter: widgets e outras ferramentas que o orbitam", "data_hora":"2021-10-17 10:00:00", "vagas": "20", "ministrantes": ["Mariana Meireles", "Marcos Pantuza", "Laysa Ucho"]},
     {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Qual produto é o melhor para mim? Comparando produtos usando a API de MELI", "data_hora":"2021-10-17 10:00:00", "vagas": "15", "ministrantes": ["Mercado Livre (facilitador: Giovanni Almeida)"]},
     {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Desvendando o código genético com Biopython", "data_hora":"2021-10-17 10:00:00", "vagas": "30", "ministrantes": ["Pâmella Araújo Balcaçar"]},
@@ -156,7 +156,9 @@ class Tutorial(commands.Cog):
 
         for index,tutorial in enumerate(self._tutoriais):
             tutorial["file_name"]=f"tutorial_{index}_file.json"
-            tutorial =await self.load_list(tutorial)
+            tutorial_ =await self.load_list(tutorial)
+            tutorial_["data_hora"] =  tutorial["data_hora"]
+            tutorial = tutorial_
             await logchannel(self.bot, f"Carregando tutorial-{index}:{tutorial.get('nome')[:20]}")
             channel = await get_or_create_channel(f"tutorial-{index}-chat", self._guild, position=99, category=organizacao_cat)
             voice=  await get_or_create_channel(f"tutorial-{index}-voice", self._guild, position=99, category=organizacao_cat,type=discord.ChannelType.voice)
