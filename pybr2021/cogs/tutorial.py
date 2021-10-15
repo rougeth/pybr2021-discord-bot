@@ -161,7 +161,7 @@ class Tutorial(commands.Cog):
     async def load_list(self,tutorial):
         if os.path.isfile(f"./json/{tutorial['file_name']}"):
             with open(f"./json/{tutorial['file_name']}", 'rb') as f:
-                tutorial=json.load(f)
+                return json.load(f)
         else:
             tutorial['userinscritos']=[]
             tutorial['inscritos']=0
@@ -235,7 +235,7 @@ class Tutorial(commands.Cog):
 
         for index,tutorial in enumerate(self._tutoriais):
             tutorial["file_name"]=f"tutorial_{index}_file.json"
-            await self.load_list(tutorial)
+            tutorial =await self.load_list(tutorial)
             await logchannel(self.bot, f"Carregando tutorial-{index}:{tutorial.get('nome')[:20]}")
             channel = await get_or_create_channel(f"tutorial-{index}-chat", self._guild, position=99, category=organizacao_cat)
             voice=  await get_or_create_channel(f"tutorial-{index}-voice", self._guild, position=99, category=organizacao_cat,type=discord.ChannelType.voice)
