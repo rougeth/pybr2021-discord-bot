@@ -230,8 +230,10 @@ class Tutorial(commands.Cog):
             tutorial["file_name"]=f"tutorial_{index}_file.pkl"
             await self.load_list(tutorial)
             await logchannel(self.bot, f"Carregando tutorial-{index}:{tutorial.get('nome')[:20]}")
-            tutorial["channel"] = await get_or_create_channel(f"tutorial-{index}-chat", self._guild, position=99, category=organizacao_cat).id
-            tutorial["voice"] = await get_or_create_channel(f"tutorial-{index}-voice", self._guild, position=99, category=organizacao_cat,type=discord.ChannelType.voice).id
+            channel = await get_or_create_channel(f"tutorial-{index}-chat", self._guild, position=99, category=organizacao_cat)
+            voice=  await get_or_create_channel(f"tutorial-{index}-voice", self._guild, position=99, category=organizacao_cat,type=discord.ChannelType.voice)
+            tutorial["channel"] = channel.id
+            tutorial["voice"] = voice.id
             await self.clear(tutorial["channel"])
             logger.info(tutorial)
             tutorial["inscritos_msg"] = await self.lista(tutorial,True)
