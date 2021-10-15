@@ -260,15 +260,14 @@ class Tutorial(commands.Cog):
         logger.info("Validando mensagem")
         if message.author.bot or message.channel.type == discord.ChannelType.private:
             return
-
+            
         for index,tutorial in enumerate(self._tutoriais):
             logger.info("Loop Tutorias")
-            if not self._allowtouser:
-                logger.info("Sem permissão de escrita ainda")
-                await message.delete()
-                return
             channel = self.bot.get_channel(tutorial["channel"])
             if message.channel.id == channel.id:
+                if not self._allowtouser:
+                    await message.delete()
+                    return
                 logger.info(f"Mensagem dentro de canal {message.channel.name}")
                 if message.content.lower() == "entrar":
                     if message.author.id in tutorial["userinscritos"]:
