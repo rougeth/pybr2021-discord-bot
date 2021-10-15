@@ -26,6 +26,7 @@ DISCORD_GUILD_ID = config("DISCORD_GUILD_ID")
 DISCORD_LOG_CHANNEL_ID = config("DISCORD_LOG_CHANNEL_ID")
 DISCORD_GENERAL_INVITE = config("DISCORD_GENERAL_INVITE")
 
+
 ROLE_INVITE_MAP = [
     ("Ministrantes", ["zuNYMG4jud"]),
     ("Voluntariado", ["j9YH9BqU"]),
@@ -114,10 +115,10 @@ async def logchannel(bot, message):
 #         index[profile["email"].lower()] = profile
 #     return index
 
-
+#"vagas": "25
 MSG="""Tutorial {channel}"""
 TUTORIAIS = [
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Desenhando com Python: programação criativa ao alcance de todas as pessoas", "data_hora": "dia 17/10/2021 às 10h", "vagas": "25", "ministrantes": ["Alexandre Villares"]},
+    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Desenhando com Python: programação criativa ao alcance de todas as pessoas", "data_hora": "dia 17/10/2021 às 10h", "vagas": "5", "ministrantes": ["Alexandre Villares"]},
     {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Análise de Datasets Científicos usando Python", "data_hora": "dia 16/10/2021 às 10h", "vagas": "100", "ministrantes": ["Bruno dos Santos Almeida"]},
     {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "1-Djavue - criando uma aplicação web do zero com Django e Vue.js", "data_hora": "dia 16/10/2021 às 10h", "vagas": "80", "ministrantes": ["Buser (facilitadora: Renzo Nuccitelli)"]},
     {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "2-Djavue - criando uma aplicação web do zero com Django e Vue.js", "data_hora": "dia 16/10/2021 às 15h", "vagas": "80", "ministrantes": ["Buser (facilitadora: Renzo Nuccitelli)"]},
@@ -149,23 +150,24 @@ class Tutorial(commands.Cog):
         self.bot = bot
         self._guild = None
         self._allowtouser= False
+        self._tutoriais = []
 
     async def save_list(self,tutorial):
-        os.makedirs("./pickles",exist_ok=True)
-        with open(f"./pickles/{tutorial['file_name']}", 'wb') as f:
-            pickle.dump(tutorial, f)
+        os.makedirs("./json",exist_ok=True)
+        with open(f"./json/{tutorial['file_name']}", 'w') as f:
+            json.dump(tutorial, f)
 
     async def load_list(self,tutorial):
-        if os.path.isfile(f"./pickles/{tutorial['file_name']}"):
-            with open(f"./pickles/{tutorial['file_name']}", 'rb') as f:
-                tutorial=pickle.load(f)
+        if os.path.isfile(f"./json/{tutorial['file_name']}"):
+            with open(f"./json/{tutorial['file_name']}", 'rb') as f:
+                tutorial=json.load(f)
         else:
             tutorial['userinscritos']=[]
             tutorial['inscritos']=0
             await self.save_list(tutorial)
 
     async def remove_files(self):
-        shutil.rmtree("./pickles/")
+        shutil.rmtree("./json/")
 
     #@commands.Cog.listener()
     async def on_raw_reaction_add(self, reaction: discord.Reaction, user: discord.Member):
@@ -197,8 +199,9 @@ class Tutorial(commands.Cog):
             self._guild = await self.bot.fetch_guild(config("DISCORD_GUILD_ID"))
         return self._guild
 
-    @commands.command(name="tutoriais-reset",brief="warnig on use that!!")
-    async def on_ready(self, ctx):
+    @commands.command(name="reset-tutoriais",brief="warnig on use that!!")
+    async def reset(self, ctx):
+        logger.info("Resetando Tutoriais")
         self._allowtouser=False
         await self.remove_files()
         await self.on_ready(True)
@@ -224,19 +227,23 @@ class Tutorial(commands.Cog):
                 for cat in guilds.categories:
                     if cat.name == "TUTORIAIS":
                         for c  in cat.channels:
+                            logger.info(f"Apagando {c.name}")
                             await c.delete()
 
-        for index,tutorial in enumerate(TUTORIAIS[:2]):
-            tutorial["file_name"]=f"tutorial_{index}_file.pkl"
+        self._tutoriais = TUTORIAIS[:2]
+
+        for index,tutorial in enumerate(self._tutoriais):
+            tutorial["file_name"]=f"tutorial_{index}_file.json"
             await self.load_list(tutorial)
             await logchannel(self.bot, f"Carregando tutorial-{index}:{tutorial.get('nome')[:20]}")
             channel = await get_or_create_channel(f"tutorial-{index}-chat", self._guild, position=99, category=organizacao_cat)
             voice=  await get_or_create_channel(f"tutorial-{index}-voice", self._guild, position=99, category=organizacao_cat,type=discord.ChannelType.voice)
-            tutorial["channel"] = channel.id
-            tutorial["voice"] = voice.id
+            tutorial["channel"] = int(channel.id)
+            tutorial["voice"] = int(voice.id)
             await self.clear(tutorial["channel"])
             logger.info(tutorial)
-            tutorial["inscritos_msg"] = await self.lista(tutorial,True)
+            msg= await self.lista(tutorial,True)
+            tutorial["inscritos_msg"] = int(msg.id)
         
         self._allowtouser=True
         logger.info("Canais criados com sucesso")
@@ -259,7 +266,7 @@ class Tutorial(commands.Cog):
             await message.delete()
             return
 
-        for index,tutorial in enumerate(TUTORIAIS):
+        for index,tutorial in enumerate(self._tutoriais):
             logger.info("Loop Tutorias")
             channel = self.bot.get_channel(tutorial["channel"])
             if message.channel.id == channel.id:
@@ -274,6 +281,7 @@ class Tutorial(commands.Cog):
                     logger.info(f"Cadastrando usuário {message.author.name}")
                     tutorial['inscritos']+=1
                     tutorial["userinscritos"].append(message.author.id)
+                    logger.info(tutorial)
                     await self.save_list(tutorial)
 
                 if message.content.lower() == "sair":
@@ -303,7 +311,8 @@ class Tutorial(commands.Cog):
         else:
             msg+="\nVagas Abertas !! - Envie << entrar >> para  sua inscrição ou << sair >> para remover sua inscrição"
         if not init: 
-            await tutorial["inscritos_msg"].edit(content=msg) 
+            message= await channel.fetch_message(tutorial["inscritos_msg"])
+            await message.edit(content=msg) 
             return
         logger.info(msg)
         return await channel.send(msg)
