@@ -156,6 +156,7 @@ class Tutorial(commands.Cog):
         os.makedirs("./json",exist_ok=True)
         with open(f"./json/{tutorial['file_name']}", 'w') as f:
             json.dump(tutorial, f)
+        
 
     async def load_list(self,tutorial):
         if os.path.isfile(f"./json/{tutorial['file_name']}"):
@@ -230,7 +231,7 @@ class Tutorial(commands.Cog):
                             logger.info(f"Apagando {c.name}")
                             await c.delete()
 
-        self._tutoriais = TUTORIAIS[:2]
+        self._tutoriais = TUTORIAIS[:1]
 
         for index,tutorial in enumerate(self._tutoriais):
             tutorial["file_name"]=f"tutorial_{index}_file.json"
@@ -260,7 +261,7 @@ class Tutorial(commands.Cog):
         logger.info("Validando mensagem")
         if message.author.bot or message.channel.type == discord.ChannelType.private:
             return
-            
+
         for index,tutorial in enumerate(self._tutoriais):
             logger.info("Loop Tutorias")
             channel = self.bot.get_channel(tutorial["channel"])
@@ -292,6 +293,9 @@ class Tutorial(commands.Cog):
 
                 await message.delete()
                 await self.lista(tutorial)
+
+        for item in self._tutoriais:
+            logger.info(item)
 
     async def lista(self,tutorial,init=False):
         channel = self.bot.get_channel(tutorial["channel"])
