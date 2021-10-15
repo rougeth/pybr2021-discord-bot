@@ -288,6 +288,7 @@ class Tutorial(commands.Cog):
                 await self.lista(tutorial)
 
     async def lista(self,tutorial,init=False):
+        channel = self.bot.get_channel(tutorial["channel"])
         msg = f"{MSG.format(channel=tutorial['nome'])}"
         msg+= f"\nDia e Hora: {tutorial['data_hora']}"
         for ministrante in tutorial['ministrantes']:
@@ -305,7 +306,7 @@ class Tutorial(commands.Cog):
             await tutorial["inscritos_msg"].edit(content=msg) 
             return
         logger.info(msg)
-        return await tutorial['channel'].send(msg)
+        return await channel.send(msg)
 
            
             #await message.channel.send(f"comandos aceitos:entrar,sair,lista")
