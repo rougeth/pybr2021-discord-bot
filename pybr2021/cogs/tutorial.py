@@ -118,27 +118,27 @@ async def logchannel(bot, message):
 #"vagas": "25
 MSG="""Tutorial {channel}"""
 TUTORIAIS = [
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Desenhando com Python: programação criativa ao alcance de todas as pessoas", "data_hora": "dia 17/10/2021 às 10h", "vagas": "5", "ministrantes": ["Alexandre Villares"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Análise de Datasets Científicos usando Python", "data_hora": "dia 16/10/2021 às 10h", "vagas": "100", "ministrantes": ["Bruno dos Santos Almeida"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "1-Djavue - criando uma aplicação web do zero com Django e Vue.js", "data_hora": "dia 16/10/2021 às 10h", "vagas": "80", "ministrantes": ["Buser (facilitadora: Renzo Nuccitelli)"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "2-Djavue - criando uma aplicação web do zero com Django e Vue.js", "data_hora": "dia 16/10/2021 às 15h", "vagas": "80", "ministrantes": ["Buser (facilitadora: Renzo Nuccitelli)"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Desenvolvimento orientado a testes com Django", "data_hora": "dia 17/10/2021 às 15h", "vagas": "20", "ministrantes": ["Carta (facilitador: Gabriel Saldanha)"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Como o dinheiro viaja internacionalmente?", "data_hora": "dia 16/10/2021 às 10h", "vagas": "80", "ministrantes": ["Ebury (facilitador: Gustavo Di Domenico)"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Acelerando a exploração de dados multidimensionais com Xarray", "data_hora": "dia 17/10/2021 às 15h", "vagas": "60", "ministrantes": ["Felipe Schuch"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Python para microcontroladores com MicroPython", "data_hora": "dia 17/10/2021às 10h", "vagas": "10", "ministrantes": ["Gabriel Aragão"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Python Geoespacial: automatizando processos de GIS e Sensoriamento Remoto com pacotes abertos em python", "data_hora": "dia 17/10/2021 às 15h", "vagas": "15", "ministrantes": ["Guilherme Iablonovski"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Viajando por uma API protegida: Implementando uma API com Flask", "data_hora": "dia 16/10/2021 às 10h", "vagas": "30", "ministrantes": ["Jessica Temporal"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Expectativas nem sempre machucam - Criando expectativas para os seus dados com Great Expectations.", "data_hora": "dia 16/10/2021 às 15h", "vagas": "20", "ministrantes": ["Joamila Brito"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Analisando 250GB em segundos usando Python e a Base dos Dados", "data_hora": "dia 16/10/2021 às 10h", "vagas": "10", "ministrantes": ["João Carabetta"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Criando um jogo de plataforma com Pygame do zero", "data_hora": "dia 16/10/2021 às 10h", "vagas": "12", "ministrantes": ["João JS Bueno"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Python para Dashboards", "data_hora": "dia 17/10/2021 às 15h", "vagas": "30", "ministrantes": ["Jose Edivaldo da Silva Junior"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Airflow na Pratica", "data_hora": "dia 16 às 10h", "vagas": "40", "ministrantes": ["JusBrasil (facilitador: Tarsis)"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Anatomia de um interpretador Lisp em Python", "data_hora": "dia/10/2021 16 às 15h", "vagas": "30", "ministrantes": ["Luciano Ramalho"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Construindo API's robustas utilizando Python", "data_hora": "dia 16/10/2021 às 15h", "vagas": "30", "ministrantes": ["Luizalabs (facilitador: Cassio Botaro)"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "As luas de Jupyter: widgets e outras ferramentas que o orbitam", "data_hora": "dia 17/10/2021 às 10h", "vagas": "20", "ministrantes": ["Mariana Meireles", "Marcos Pantuza", "Laysa Ucho"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Qual produto é o melhor para mim? Comparando produtos usando a API de MELI", "data_hora": "dia 17/10/2021 às 10h", "vagas": "15", "ministrantes": ["Mercado Livre (facilitador: Giovanni Almeida)"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Desvendando o código genético com Biopython", "data_hora": "dia 17/10/2021 às 10h", "vagas": "30", "ministrantes": ["Pâmella Araújo Balcaçar"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Manipulando Imagens da webCam com python", "data_hora": "dia 17/10/2021 às 15h", "vagas": "40", "ministrantes": ["Ramon Domingos Duarte Oliveira"]},
+    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Desenhando com Python: programação criativa ao alcance de todas as pessoas", "data_hora":"2021-10-17 10:00:00", "vagas": "5", "ministrantes": ["Alexandre Villares"]},
+    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Análise de Datasets Científicos usando Python", "data_hora":"2021-10-17 10:00:00", "vagas": "100", "ministrantes": ["Bruno dos Santos Almeida"]},
+    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "1-Djavue - criando uma aplicação web do zero com Django e Vue.js", "data_hora":"2021-10-17 10:00:00", "vagas": "80", "ministrantes": ["Buser (facilitadora: Renzo Nuccitelli)"]},
+    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "2-Djavue - criando uma aplicação web do zero com Django e Vue.js", "data_hora":"2021-10-17 15:00:00", "vagas": "80", "ministrantes": ["Buser (facilitadora: Renzo Nuccitelli)"]},
+    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Desenvolvimento orientado a testes com Django", "data_hora":"2021-10-17 15:00:00", "vagas": "20", "ministrantes": ["Carta (facilitador: Gabriel Saldanha)"]},
+    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Como o dinheiro viaja internacionalmente?", "data_hora":"2021-10-17 10:00:00", "vagas": "80", "ministrantes": ["Ebury (facilitador: Gustavo Di Domenico)"]},
+    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Acelerando a exploração de dados multidimensionais com Xarray", "data_hora":"2021-10-17 15:00:00", "vagas": "60", "ministrantes": ["Felipe Schuc:00:00"]},
+    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Python para microcontroladores com MicroPython", "data_hora":"2021-10-17 10:00:00", "vagas": "10", "ministrantes": ["Gabriel Aragão"]},
+    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Python Geoespacial: automatizando processos de GIS e Sensoriamento Remoto com pacotes abertos em python", "data_hora":"2021-10-17 15:00:00", "vagas": "15", "ministrantes": ["Guilherme Iablonovski"]},
+    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Viajando por uma API protegida: Implementando uma API com Flask", "data_hora":"2021-10-17 10:00:00", "vagas": "30", "ministrantes": ["Jessica Temporal"]},
+    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Expectativas nem sempre machucam - Criando expectativas para os seus dados com Great Expectations.", "data_hora":"2021-10-17 15:00:00", "vagas": "20", "ministrantes": ["Joamila Brito"]},
+    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Analisando 250GB em segundos usando Python e a Base dos Dados", "data_hora":"2021-10-17 10:00:00", "vagas": "10", "ministrantes": ["João Carabetta"]},
+    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Criando um jogo de plataforma com Pygame do zero", "data_hora":"2021-10-17 10:00:00", "vagas": "12", "ministrantes": ["João JS Bueno"]},
+    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Python para Dashboards", "data_hora":"2021-10-17 15:00:00", "vagas": "30", "ministrantes": ["Jose Edivaldo da Silva Junior"]},
+    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Airflow na Pratica", "data_hora":"2021-10-16 10:00:00", "vagas": "40", "ministrantes": ["JusBrasil (facilitador: Tarsis)"]},
+    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Anatomia de um interpretador Lisp em Python", "data_hora": "2011-10-17 15:00:00", "vagas": "30", "ministrantes": ["Luciano Ramalho"]},
+    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Construindo API's robustas utilizando Python", "data_hora":"2021-10-17 15:00:00", "vagas": "30", "ministrantes": ["Luizalabs (facilitador: Cassio Botaro)"]},
+    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "As luas de Jupyter: widgets e outras ferramentas que o orbitam", "data_hora":"2021-10-17 10:00:00", "vagas": "20", "ministrantes": ["Mariana Meireles", "Marcos Pantuza", "Laysa Ucho"]},
+    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Qual produto é o melhor para mim? Comparando produtos usando a API de MELI", "data_hora":"2021-10-17 10:00:00", "vagas": "15", "ministrantes": ["Mercado Livre (facilitador: Giovanni Almeida)"]},
+    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Desvendando o código genético com Biopython", "data_hora":"2021-10-17 10:00:00", "vagas": "30", "ministrantes": ["Pâmella Araújo Balcaçar"]},
+    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Manipulando Imagens da webCam com python", "data_hora":"2021-10-17 15:00:00", "vagas": "40", "ministrantes": ["Ramon Domingos Duarte Oliveira"]},
 ]
 
 class Tutorial(commands.Cog):
@@ -156,6 +156,7 @@ class Tutorial(commands.Cog):
         os.makedirs("./json",exist_ok=True)
         with open(f"./json/{tutorial['file_name']}", 'w') as f:
             json.dump(tutorial, f)
+        return tutorial
         
 
     async def load_list(self,tutorial):
@@ -165,7 +166,7 @@ class Tutorial(commands.Cog):
         else:
             tutorial['userinscritos']=[]
             tutorial['inscritos']=0
-            await self.save_list(tutorial)
+            return await self.save_list(tutorial)
 
     async def remove_files(self):
         shutil.rmtree("./json/")
@@ -200,12 +201,26 @@ class Tutorial(commands.Cog):
             self._guild = await self.bot.fetch_guild(config("DISCORD_GUILD_ID"))
         return self._guild
 
-    @commands.command(name="reset-tutoriais",brief="warnig on use that!!")
+    @commands.command(name="reset",brief="warnig on use that!!")
     async def reset(self, ctx):
         logger.info("Resetando Tutoriais")
         self._allowtouser=False
         await self.remove_files()
         await self.on_ready(True)
+    
+    @commands.command(name="open",brief="warnig on use that!!")
+    async def open(self, ctx):
+        #await self.on_ready()
+        self._allowtouser=True
+        for tutorial in self._tutoriais:
+            await self.lista(tutorial)
+
+    @commands.command(name="close",brief="warnig on use that!!")
+    async def close(self, ctx):
+        #await self.on_ready()
+        self._allowtouser=False
+        for tutorial in self._tutoriais:
+            await self.lista(tutorial)
 
     @commands.Cog.listener()
     async def on_ready(self,force_clean=False):
@@ -245,8 +260,9 @@ class Tutorial(commands.Cog):
             logger.info(tutorial)
             msg= await self.lista(tutorial,True)
             tutorial["inscritos_msg"] = int(msg.id)
-        
-        self._allowtouser=True
+
+            self._tutoriais[index] = tutorial
+
         logger.info("Canais criados com sucesso")
         
 
@@ -263,7 +279,7 @@ class Tutorial(commands.Cog):
             return
 
         for index,tutorial in enumerate(self._tutoriais):
-            logger.info("Loop Tutorias")
+            logger.info(f"Loop Tutoriais {tutorial}")
             channel = self.bot.get_channel(tutorial["channel"])
             if message.channel.id == channel.id:
                 if not self._allowtouser:
@@ -282,6 +298,7 @@ class Tutorial(commands.Cog):
                     tutorial["userinscritos"].append(message.author.id)
                     logger.info(tutorial)
                     await self.save_list(tutorial)
+                    self._tutoriais[index] = tutorial
 
                 if message.content.lower() == "sair":
                 
@@ -290,17 +307,18 @@ class Tutorial(commands.Cog):
                         tutorial['inscritos']-=1
                         tutorial["userinscritos"].remove(message.author.id)
                         await self.save_list(tutorial)
+                        self._tutoriais[index] = tutorial
 
                 await message.delete()
                 await self.lista(tutorial)
 
-        for item in self._tutoriais:
-            logger.info(item)
-
     async def lista(self,tutorial,init=False):
         channel = self.bot.get_channel(tutorial["channel"])
-        msg = f"{MSG.format(channel=tutorial['nome'])}"
-        msg+= f"\nDia e Hora: {tutorial['data_hora']}"
+
+        msg=""
+        msg+="### INSCRIÇÕES FECHADAS ###" if not self._allowtouser else "### INSCRIÇÕES ABERTAS ###\n### DIGITE a palavra 'entrar' para sua inscrição ou 'sair' para remover sua inscrição ###"
+        msg+= f"\n{MSG.format(channel=tutorial['nome'])}"
+        msg+= f"\nDia e Hora: {datetime.strptime(tutorial['data_hora'],'%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y %H:%M:%S')}"  
         for ministrante in tutorial['ministrantes']:
             msg+=f"\nMinistrante: {ministrante}"
 
@@ -309,9 +327,10 @@ class Tutorial(commands.Cog):
             msg+=f"\n<@{item}>"
         
         if tutorial['inscritos'] == tutorial['vagas']:
-            msg+="\nTutorial Lotado !!- Envie << sair >> para remover sua inscrição"
+            msg+="\nTUTORIAL **LOTADO**"
         else:
-            msg+="\nVagas Abertas !! - Envie << entrar >> para  sua inscrição ou << sair >> para remover sua inscrição"
+            msg+="\nCOM VAGAS"
+
         if not init: 
             message= await channel.fetch_message(tutorial["inscritos_msg"])
             await message.edit(content=msg) 
