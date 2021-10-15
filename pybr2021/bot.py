@@ -1,6 +1,8 @@
 import asyncio
 import os
+import random
 import sys
+from datetime import datetime
 from typing import Dict
 
 import discord
@@ -20,14 +22,18 @@ if SENTRY_TOKEN:
     sentry_sdk.init(SENTRY_TOKEN, traces_sample_rate=1.0)
 
 DISCORD_TOKEN = config("DISCORD_TOKEN")
+SLUG = config("SLUG","pybr!")
 
-bot = commands.Bot(command_prefix="pybr!", intents=discord.Intents.all())
-bot.add_cog(cogs.Reminders(bot))
+bot = commands.Bot(command_prefix=SLUG, intents=discord.Intents.all())
+#bot.add_cog(cogs.Reminders(bot))
 #bot.add_cog(cogs.Greetings(bot))
-bot.add_cog(cogs.Greetings2(bot))
-bot.add_cog(cogs.Schedules(bot))
+#bot.add_cog(cogs.Greetings2(bot))
+#bot.add_cog(cogs.Schedules(bot))
+bot.add_cog(cogs.Tutorial(bot))
 
 config_file = toml.load("./config.toml")
+
+logger.info(f"Bot run with slug: {SLUG}")
 
 @bot.event
 async def on_error(event, *args, **kwargs):
