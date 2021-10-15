@@ -233,6 +233,7 @@ class Tutorial(commands.Cog):
             tutorial["channel"] = await get_or_create_channel(f"tutorial-{index}-chat", self._guild, position=99, category=organizacao_cat)
             tutorial["voice"] = await get_or_create_channel(f"tutorial-{index}-voice", self._guild, position=99, category=organizacao_cat,type=discord.ChannelType.voice)
             await self.clear(tutorial["channel"])
+            logger.info(tutorial)
             tutorial["inscritos_msg"] = await self.lista(tutorial,True)
         
         self._allowtouser=True
@@ -247,8 +248,7 @@ class Tutorial(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         logger.info("Validando mensagem")
-        if message.author.bot or message.channel.type == discord.ChannelType.private or not self._allowtouser:
-            logger.info("Mensagem de bot ou privada")
+        if message.author.bot or message.channel.type == discord.ChannelType.private:
             return
 
         if not self._allowtouser:
