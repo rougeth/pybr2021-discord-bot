@@ -230,9 +230,8 @@ class Tutorial(commands.Cog):
             tutorial["file_name"]=f"tutorial_{index}_file.pkl"
             await self.load_list(tutorial)
             await logchannel(self.bot, f"Carregando tutorial-{index}:{tutorial.get('nome')[:20]}")
-            tutorial["channel"] = await get_or_create_channel(f"tutorial-{index}-chat", self._guild, position=99, category=organizacao_cat)
-            logger.info(tutorial["channel"])
-            tutorial["voice"] = await get_or_create_channel(f"tutorial-{index}-voice", self._guild, position=99, category=organizacao_cat,type=discord.ChannelType.voice)
+            tutorial["channel"] = await get_or_create_channel(f"tutorial-{index}-chat", self._guild, position=99, category=organizacao_cat).id
+            tutorial["voice"] = await get_or_create_channel(f"tutorial-{index}-voice", self._guild, position=99, category=organizacao_cat,type=discord.ChannelType.voice).id
             await self.clear(tutorial["channel"])
             logger.info(tutorial)
             tutorial["inscritos_msg"] = await self.lista(tutorial,True)
@@ -242,7 +241,8 @@ class Tutorial(commands.Cog):
         
 
     async def clear(self,channel):
-        messages = await channel.history().flatten()
+        channel_msg = self.bot.get_channel(channel)
+        messages = await channel_msg.history().flatten()
         for msg in messages:
             await msg.delete()
 
@@ -259,7 +259,8 @@ class Tutorial(commands.Cog):
 
         for index,tutorial in enumerate(TUTORIAIS):
             logger.info("Loop Tutorias")
-            if message.channel.id == tutorial["channel"].id:
+            channel = self.bot.get_channel(tutorial["channel"])
+            if message.channel.id == channel.id:
                 logger.info(f"Mensagem dentro de canal {message.channel.name}")
                 if message.content.lower() == "entrar":
                     if message.author.id in tutorial["userinscritos"]:
