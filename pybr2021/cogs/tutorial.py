@@ -179,7 +179,7 @@ class Tutorial(commands.Cog):
             tutorial = tutorial_    
             channel = self.bot.get_channel(tutorial["channel"])
             canal =  f"<#{channel.id}>" if channel else ''
-            data = {tutorial['nome']} - {canal} - {datetime.strptime(tutorial['data_hora'],'%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y %H:%M')}"
+            data = f"{tutorial['nome']} - {canal} - {datetime.strptime(tutorial['data_hora'],'%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y %H:%M')}"
             insc=[]
             for inscritos in tutorial.get("userinscritos"):
                 inscrito = discord.utils.get(self.bot.get_all_members(), id=inscritos)
