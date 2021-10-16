@@ -181,8 +181,9 @@ class Tutorial(commands.Cog):
             canal =  f"<#{channel.id}>" if channel else ''
             await logchannel(self.bot,f"Inscritos em {tutorial['nome']} - {canal} - {datetime.strptime(tutorial['data_hora'],'%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y %H:%M')}")
             for inscritos in tutorial.get("userinscritos"):
-                inscrito = self.bot.get_member(inscritos)
-                await logchannel(self.bot,f"    {inscrito.name} - <#{inscrito.id}")
+                inscrito = discord.utils.get(self.bot.get_all_members(), id=inscritos)
+                if inscrito:
+                    await logchannel(self.bot,f"    {inscrito.name} - <#{inscrito.id}")
 
     @commands.command(name="close",brief="warnig on use that!!")
     async def close(self, ctx):
