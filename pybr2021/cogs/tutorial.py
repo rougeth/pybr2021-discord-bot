@@ -171,7 +171,7 @@ class Tutorial(commands.Cog):
         logger.info("full_msg")
 
         self._tutoriais = TUTORIAIS
-
+        out=[]
         for index,tutorial in enumerate(self._tutoriais):
             tutorial["file_name"]=f"tutorial_{index}_file.json"
             tutorial_ =await self.load_list(tutorial)
@@ -179,11 +179,20 @@ class Tutorial(commands.Cog):
             tutorial = tutorial_    
             channel = self.bot.get_channel(tutorial["channel"])
             canal =  f"<#{channel.id}>" if channel else ''
-            await logchannel(self.bot,f"Inscritos em {tutorial['nome']} - {canal} - {datetime.strptime(tutorial['data_hora'],'%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y %H:%M')}")
+            data = {tutorial['nome']} - {canal} - {datetime.strptime(tutorial['data_hora'],'%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y %H:%M')}"
+            insc=[]
             for inscritos in tutorial.get("userinscritos"):
                 inscrito = discord.utils.get(self.bot.get_all_members(), id=inscritos)
                 if inscrito:
-                    await logchannel(self.bot,f"======   {inscrito.name} - <@{inscrito.id}>")
+                    insc.append(f"{inscrito.name} - <@{inscrito.id}>")
+                    #await logchannel(self.bot,f"======   {inscrito.name} - <@{inscrito.id}>")
+            out.append=dict(data=data,inscritos=insc)
+        
+        logger.info(out)
+        os.makedirs("./json",exist_ok=True)
+        with open(f"./json/inscritos.json", 'w') as f:
+            json.dump(out, f)
+
 
     @commands.command(name="close",brief="warnig on use that!!")
     async def close(self, ctx):
