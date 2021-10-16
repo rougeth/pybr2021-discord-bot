@@ -183,7 +183,7 @@ class Tutorial(commands.Cog):
             for inscritos in tutorial.get("userinscritos"):
                 inscrito = discord.utils.get(self.bot.get_all_members(), id=inscritos)
                 if inscrito:
-                    await logchannel(self.bot,f"======   {inscrito.name} - <#{inscrito.id}>")
+                    await logchannel(self.bot,f"======   {inscrito.name} - <@{inscrito.id}>")
 
     @commands.command(name="close",brief="warnig on use that!!")
     async def close(self, ctx):
