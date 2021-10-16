@@ -206,55 +206,56 @@ class Tutorial(commands.Cog):
             logger.info("Inscrições fechadas")
             await logchannel(self.bot,"Inscrições fechadas")
 
-    # @commands.Cog.listener()
-    # async def on_ready(self,force_clean=False):
-    #     logger.info("Criando Canais")
+    @commands.Cog.listener()
+    async def on_ready(self,force_clean=False):
+        logger.info("Criando Canais")
 
-    #     self._guild = await self.bot.fetch_guild(config("DISCORD_GUILD_ID"))
+        self._guild = await self.bot.fetch_guild(config("DISCORD_GUILD_ID"))
 
-    #     overwrites = {
-    #     self._guild.default_role: discord.PermissionOverwrite(read_messages=False)}
-    #     organizacao_cat = await get_or_create_channel(
-    #         "TUTORIAIS",
-    #         self._guild,
-    #         type=discord.ChannelType.category,
-    #         overwrites=overwrites,
-    #         position=0,
-    #     )
+        overwrites = {
+        self._guild.default_role: discord.PermissionOverwrite(read_messages=False)}
+        organizacao_cat = await get_or_create_channel(
+            "TUTORIAIS",
+            self._guild,
+            type=discord.ChannelType.category,
+            overwrites=overwrites,
+            position=0,
+        )
 
-    #     if force_clean:
-    #         for guilds in self.bot.guilds:
-    #             for cat in guilds.categories:
-    #                 if cat.name == "TUTORIAIS":
-    #                     for c  in cat.channels:
-    #                         logger.info(f"Apagando {c.name}")
-    #                         await c.delete()
+        if force_clean:
+            pass
+            # for guilds in self.bot.guilds:
+            #     for cat in guilds.categories:
+            #         if cat.name == "TUTORIAIS-TESTES":
+            #             for c  in cat.channels:
+            #                 logger.info(f"Apagando {c.name}")
+            #                 await c.delete()
 
-    #     self.channel = await get_or_create_channel(f"tutorial-info", self._guild, position=0, category=organizacao_cat)
-    #     self.voice=  await get_or_create_channel(f"tutorial-ajuda", self._guild, position=0, category=organizacao_cat,type=discord.ChannelType.voice)
+        self.channel = await get_or_create_channel(f"tutorial-info", self._guild, position=0, category=organizacao_cat)
+        self.voice=  await get_or_create_channel(f"tutorial-ajuda", self._guild, position=0, category=organizacao_cat,type=discord.ChannelType.voice)
 
-    #     self._tutoriais = TUTORIAIS
+        self._tutoriais = TUTORIAIS[:1]
 
-    #     for index,tutorial in enumerate(self._tutoriais):
-    #         tutorial["file_name"]=f"tutorial_{index}_file.json"
-    #         tutorial_ =await self.load_list(tutorial)
-    #         tutorial_["data_hora"] =  tutorial["data_hora"]
-    #         tutorial = tutorial_
-    #         await logchannel(self.bot, f"Carregando tutorial-{index}:{tutorial.get('nome')[:20]}")
-    #         channel = await get_or_create_channel(f"tutorial-{index}-chat", self._guild, position=99, category=organizacao_cat)
-    #         voice=  await get_or_create_channel(f"tutorial-{index}-voice", self._guild, position=99, category=organizacao_cat,type=discord.ChannelType.voice)
-    #         tutorial["channel"] = int(channel.id)
-    #         tutorial["voice"] = int(voice.id)
-    #         await self.clear(tutorial["channel"])
-    #         logger.info(tutorial)
-    #         msg= await self.lista(tutorial,True)
-    #         tutorial["inscritos_msg"] = int(msg.id)
+        for index,tutorial in enumerate(self._tutoriais):
+            tutorial["file_name"]=f"tutorial_{index}_file.json"
+            tutorial_ =await self.load_list(tutorial)
+            tutorial_["data_hora"] =  tutorial["data_hora"]
+            tutorial = tutorial_
+            await logchannel(self.bot, f"Carregando tutorial-{index}:{tutorial.get('nome')[:20]}")
+            channel = await get_or_create_channel(f"tutorial-{index}-chat", self._guild, position=99, category=organizacao_cat)
+            voice=  await get_or_create_channel(f"tutorial-{index}-voice", self._guild, position=99, category=organizacao_cat,type=discord.ChannelType.voice)
+            tutorial["channel"] = int(channel.id)
+            tutorial["voice"] = int(voice.id)
+            #await self.clear(tutorial["channel"])
+            logger.info(tutorial)
+            msg= await self.lista(tutorial,True)
+            tutorial["inscritos_msg"] = int(msg.id)
 
-    #         self._tutoriais[index] = tutorial
+            self._tutoriais[index] = tutorial
 
-    #     await self.show_tutoriais()
-    #     logger.info("Canais criados com sucesso")
-    #     await logchannel(self.bot,"Canais criados com sucesso")
+        await self.show_tutoriais()
+        logger.info("Canais criados com sucesso")
+        await logchannel(self.bot,"Canais criados com sucesso")
 
     async def show_tutoriais(self):
 
@@ -283,47 +284,53 @@ class Tutorial(commands.Cog):
         for msg in messages:
             await msg.delete()
 
-    #@commands.Cog.listener()
-    # async def on_message(self, message: discord.Message):
-    #     logger.info("Validando mensagem")
-    #     if message.author.bot or message.channel.type == discord.ChannelType.private:
-    #         return
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message):
+        logger.info("Validando mensagem")
+        if message.author.bot or message.channel.type == discord.ChannelType.private:
+            return
 
-    #     for index,tutorial in enumerate(self._tutoriais):
-    #         channel = self.bot.get_channel(tutorial["channel"])
-    #         if message.channel.id == channel.id and channel.id:
-    #             if not self._allowtouser:
-    #                 await message.delete()
-    #                 return
-    #             logger.info(f"Mensagem dentro de canal {message.channel.name}")
-    #             if message.content.lower() == "entrar":
-    #                 if message.author.id in tutorial["userinscritos"]:
-    #                     logger.info(f"Usuário já cadastrado {message.author.name}")
-    #                     await message.delete()
-    #                     await self.lista(tutorial)
-    #                     return  
+        for index,tutorial in enumerate(self._tutoriais):
+            channel = self.bot.get_channel(tutorial["channel"])
+            # if channel is None:
+            #     continue
+            if message.channel.id == channel.id:
+                logger.info(f"Mensagem dentro de canal {message.channel.name}")
+                if message.content.lower() == "entrar":
+                    if message.author.id in tutorial["userinscritos"]:
+                        logger.info(f"Usuário já cadastrado {message.author.name}")
+                        #await message.delete()
+                        await self.lista(tutorial)
+                        return  
 
-    #                 logger.info(f"Cadastrando usuário {message.author.name}")
-    #                 await logchannel(self.bot,f"Cadastrando usuário {message.author.name} em {tutorial['nome']}")
-    #                 tutorial['inscritos']+=1
-    #                 tutorial["userinscritos"].append(message.author.id)
-    #                 logger.info(tutorial)
-    #                 await self.save_list(tutorial)
-    #                 self._tutoriais[index] = tutorial
+                    if not self._allowtouser:
+                        #await message.delete()
+                        await message.channel.send(":red_circle: INSCRIÇÕES FECHADAS :red_circle:")
+                        return
 
-    #             if message.content.lower() == "sair":
+                    logger.info(f"Cadastrando usuário {message.author.name}")
+                    await logchannel(self.bot,f"Cadastrando usuário {message.author.name} em {tutorial['nome']}")
+                    tutorial['inscritos']+=1
+                    tutorial["userinscritos"].append(message.author.id)
+                    logger.info(tutorial)
+                    await self.save_list(tutorial)
+                    self._tutoriais[index] = tutorial
+                    await self.lista(tutorial)
+
+                if message.content.lower() == "sair":
                 
-    #                 if message.author.id in tutorial["userinscritos"]:
-    #                     logger.info(f"Removendo usuário {message.author.name}")
-    #                     await logchannel(self.bot,f"Removendo usuário {message.author.name} em {tutorial['nome']}")
-    #                     tutorial['inscritos']-=1
-    #                     tutorial["userinscritos"].remove(message.author.id)
-    #                     await self.save_list(tutorial)
-    #                     self._tutoriais[index] = tutorial
+                    if message.author.id in tutorial["userinscritos"]:
+                        logger.info(f"Removendo usuário {message.author.name}")
+                        await logchannel(self.bot,f"Removendo usuário {message.author.name} em {tutorial['nome']}")
+                        tutorial['inscritos']-=1
+                        tutorial["userinscritos"].remove(message.author.id)
+                        await self.save_list(tutorial)
+                        self._tutoriais[index] = tutorial
+                        await self.lista(tutorial)
 
-    #             await message.delete()
-    #             await self.lista(tutorial)
-    #             #await self.show_tutoriais()
+                #await message.delete()
+                #await self.lista(tutorial)
+                #await self.show_tutoriais()
 
     async def lista(self,tutorial,init=False):
         channel = self.bot.get_channel(tutorial["channel"])
@@ -344,8 +351,8 @@ class Tutorial(commands.Cog):
         else:
             msg+="\n:grey_exclamation: COM VAGAS :grey_exclamation: "
 
-        if not init: 
-            message= await channel.fetch_message(tutorial["inscritos_msg"])
-            await message.edit(content=msg) 
-            return
+        # if not init: 
+        #     message= await channel.fetch_message(tutorial["inscritos_msg"])
+        #     await message.edit(content=msg) 
+        #     return
         return await channel.send(msg)
