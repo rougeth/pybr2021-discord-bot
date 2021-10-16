@@ -177,10 +177,12 @@ class Tutorial(commands.Cog):
             tutorial_ =await self.load_list(tutorial)
             tutorial_["data_hora"] =  tutorial["data_hora"]
             tutorial = tutorial_    
-            canal =  f"<#{tutorial['channel'].id}>" if tutorial['channel'] else ''
+            channel = self.bot.get_channel(tutorial["channel"])
+            canal =  f"<#{channel.id}>" if channel else ''
             await logchannel(self.bot,f"Inscritos em {tutorial['nome']} - {canal} - {datetime.strptime(tutorial['data_hora'],'%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y %H:%M')}")
             for inscritos in tutorial.get("userinscritos"):
-                await logchannel(self.bot,f"    {inscritos.name} - <#{inscritos.id}")
+                inscrito = self.bot.get_member(inscritos)
+                await logchannel(self.bot,f"    {inscrito.name} - <#{inscrito.id}")
 
     @commands.command(name="close",brief="warnig on use that!!")
     async def close(self, ctx):
