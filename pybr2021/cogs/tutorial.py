@@ -235,7 +235,7 @@ class Tutorial(commands.Cog):
         self.channel = await get_or_create_channel(f"tutorial-info", self._guild, position=0, category=organizacao_cat)
         self.voice=  await get_or_create_channel(f"tutorial-ajuda", self._guild, position=0, category=organizacao_cat,type=discord.ChannelType.voice)
 
-        self._tutoriais = TUTORIAIS[:1]
+        self._tutoriais = TUTORIAIS
 
         for index,tutorial in enumerate(self._tutoriais):
             tutorial["file_name"]=f"tutorial_{index}_file.json"
