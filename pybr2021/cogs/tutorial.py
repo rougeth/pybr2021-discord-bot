@@ -62,25 +62,25 @@ TUTORIAIS = [
 ]
 
 class Tutorial(commands.Cog):
-    SPRINTS_FILE_PATH = config("SPRINTS_FILE_PATH")
+    #SPRINTS_FILE_PATH = config("SPRINTS_FILE_PATH")
     AUTH_CHANNEL_ID = config("DISCORD_AUTH_CHANNEL_ID", cast=int)
     AUTH_START_EMOJI = "👍"
     ATTENDEES_ROLE_NAME = "Participantes"
 
     def __init__(self, bot):
 
-        fileObject = open(self.SPRINTS_FILE_PATH, "r")
-        jsonContent = fileObject.read()
+        #fileObject = open(self.SPRINTS_FILE_PATH, "r")
+        #jsonContent = fileObject.read()
         self.bot = bot
         self._guild = None
         self.channel = None
         self.message = None
         self.voice = None
-        self.sprints_json = json.loads(jsonContent)
+        # self.sprints_json = json.loads(jsonContent)
         self._allowtouser= False
         self._tutoriais = []
-        logger.info(self.sprints_json)
-        logger.info(type(self.sprints_json))
+        # logger.info(self.sprints_json)
+        # logger.info(type(self.sprints_json))
 
     async def save_list(self,tutorial):
         os.makedirs("./json",exist_ok=True)
