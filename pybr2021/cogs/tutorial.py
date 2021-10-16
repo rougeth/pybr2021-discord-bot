@@ -186,7 +186,7 @@ class Tutorial(commands.Cog):
                 if inscrito:
                     insc.append(f"{inscrito.name} - <@{inscrito.id}>")
                     #await logchannel(self.bot,f"======   {inscrito.name} - <@{inscrito.id}>")
-            out.append=dict(data=data,inscritos=insc)
+            out.append(dict(data=data,inscritos=insc))
         
         logger.info(out)
         os.makedirs("./json",exist_ok=True)
