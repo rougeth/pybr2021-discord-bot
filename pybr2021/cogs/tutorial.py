@@ -75,6 +75,7 @@ class Tutorial(commands.Cog):
         self._guild = None
         self.channel = None
         self.message = None
+        self.check_messages = False
         self.voice = None
         # self.sprints_json = json.loads(jsonContent)
         self._allowtouser= False
@@ -255,6 +256,7 @@ class Tutorial(commands.Cog):
 
         await self.show_tutoriais()
         logger.info("Canais criados com sucesso")
+        self.check_messages=True
         await logchannel(self.bot,"Canais criados com sucesso")
 
     async def show_tutoriais(self):
@@ -289,7 +291,8 @@ class Tutorial(commands.Cog):
         logger.info("Validando mensagem")
         if message.author.bot or message.channel.type == discord.ChannelType.private:
             return
-
+        if not self.check_messages:
+            return
         for index,tutorial in enumerate(self._tutoriais):
             channel = self.bot.get_channel(tutorial["channel"])
             # if channel is None:
