@@ -1,12 +1,15 @@
 
+import asyncio
 import json
 import os
 import shutil
 from base64 import b64encode
+from collections import defaultdict
 from datetime import datetime
 from functools import wraps
 
 import discord
+import httpx
 from decouple import config
 from discord import message
 from discord.enums import ChannelType
@@ -14,6 +17,7 @@ from discord.ext import commands, tasks
 from discord_setup import get_or_create_channel
 from invite_tracker import InviteTracker
 from loguru import logger
+from pytz import timezone
 
 DISCORD_GUILD_ID = config("DISCORD_GUILD_ID")
 DISCORD_LOG_CHANNEL_ID = config("DISCORD_LOG_CHANNEL_ID")
@@ -31,11 +35,14 @@ async def logchannel(bot, message):
     channel = await bot.fetch_channel(DISCORD_LOG_CHANNEL_ID)
     await channel.send(message)
 
+CALENDAR_URL = config("CALENDAR_URL")
+CALENDER_TIMEZONE= config('CALENDER_TIMEZONE','UTC')
+DISPPLAY_TIMEZONE= config('DISPPLAY_TIMEZONE','UTC')
+
+SPRINTS_CATEGORIES= config('SPRINTS_CATEGORIES','SPRINTS')
+
+
 MSG="""Tutorial {channel}"""
-
-
-
-
 
 TUTORIAIS = [
     {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Desenhando com Python: programação criativa ao alcance de todas as pessoas", "data_hora":"2021-10-17 10:00:00", "vagas": "25", "ministrantes": ["Alexandre Villares"]},
@@ -62,86 +69,136 @@ TUTORIAIS = [
 ]
 
 class Tutorial(commands.Cog):
-    #SPRINTS_FILE_PATH = config("SPRINTS_FILE_PATH")
-    AUTH_CHANNEL_ID = config("DISCORD_AUTH_CHANNEL_ID", cast=int)
-    AUTH_START_EMOJI = "👍"
-    ATTENDEES_ROLE_NAME = "Participantes"
+    SPRINTS_FILE_PATH = config("SPRINTS_FILE_PATH",'./files')
+    TUTORIALS_FILE_PATH = config("TUTORIALS_FILE_PATHS",'./files')
+
+    #TO DO SPRINT AND TUTORIALS ROLES
+    #ATTENDEES_ROLE_NAME = "Participantes"
 
     def __init__(self, bot):
-
-        #fileObject = open(self.SPRINTS_FILE_PATH, "r")
-        #jsonContent = fileObject.read()
-        self.bot = bot
+        self._bot = bot
         self._guild = None
-        self.channel = None
-        self.message = None
+        self._tutorial_channel = None
+        self._sprint_channel = None
+        self.alerts_type = ['tutorial','sprint']
+        #self.message = None
         self.check_messages = False
-        self.voice = None
-        # self.sprints_json = json.loads(jsonContent)
-        self._allowtouser= False
-        self._tutoriais = []
-        # logger.info(self.sprints_json)
-        # logger.info(type(self.sprints_json))
-
-    async def save_list(self,tutorial):
-        os.makedirs("./json",exist_ok=True)
-        with open(f"./json/{tutorial['file_name']}", 'w') as f:
-            json.dump(tutorial, f)
-        return tutorial
-        
-
-    async def load_list(self,tutorial):
-        if os.path.isfile(f"./json/{tutorial['file_name']}"):
-            with open(f"./json/{tutorial['file_name']}", 'rb') as f:
-                return json.load(f)
-        else:
-            tutorial['userinscritos']=[]
-            tutorial['inscritos']=0
-            return await self.save_list(tutorial)
-
-    async def remove_files(self):
-        shutil.rmtree("./json/")
+        self.sprints_json = self.load_sprints()
+        self._allow_mgs= False
+        self._tutorials = []
+        self._sprints=[]
+        self.index = {}
 
     async def get_guild(self):
         if not self._guild:
-            self._guild = await self.bot.fetch_guild(config("DISCORD_GUILD_ID"))
+            self._guild = await self._bot.fetch_guild(config("DISCORD_GUILD_ID"))
         return self._guild
 
-    @commands.command(name="reset",brief="warnig on use that!!")
+    @commands.Cog.listener()
+    async def on_ready(self):
+        logger.info("Tutorias module has started")
+        await self.get_guild()
+
+    async def load_events(self):
+        logger.info("Loading calendar events.")
+        url = CALENDAR_URL
+        semaphore = asyncio.BoundedSemaphore(10)
+        async with httpx.AsyncClient() as client:
+            response = await self.http_get_json(semaphore, client, url)
+
+        logger.info("Parsing events")
+        self._events = await self.parse_events(response)
+        self.index = self.create_index(self._events)
+        logger.info("Calendar finished load")
+
+    async def parse_events(self,response):
+        events=[]
+        for item in response.get("items"):
+            if item.get('extendedProperties').get('private').get('type') in self.alerts_type:
+                events.append(
+                    {
+                        'start': datetime.strptime(item.get('start').get('dateTime'),'%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=timezone(CALENDER_TIMEZONE)),
+                        'timezone':item.get('start').get('timeZone'),
+                        'location':item.get('location'),
+                        'title':item.get('extendedProperties').get('private').get('title'),
+                        'author':item.get('extendedProperties').get('private').get('author'),
+                        'discord_channel':item.get('extendedProperties').get('private').get('discord_channel'),
+                        'type':item.get('extendedProperties').get('private').get('type'),
+                        'youtube_channel':item.get('extendedProperties').get('private').get('youtube_channel'),
+                        'seats_limits':item.get('extendedProperties').get('private').get('seats_limits'),
+                    }
+            )
+        return events
+
+    def create_index(self,events):
+        index = defaultdict(list)
+        for event in events:
+            index[event["start"].date()].append(event)
+
+    def load_sprints(self):
+        if self.SPRINTS_FILE_PATH:
+            return json.loads(open(self.SPRINTS_FILE_PATH, "r").read()) 
+        return None
+
+    async def _save_files(self):
+        os.makedirs("./json",exist_ok=True)
+        with open(f"./json/{self._tutorials['file_name']}", 'w') as f:
+            json.dump(object, f)
+        return object
+
+    async def _save_files(self):
+        if os.path.isfile(f"./json/{self._tutorials['file_name']}"):
+            with open(f"./json/{self._tutorials['file_name']}", 'rb') as f:
+                return json.load(f)
+        else:
+            self._tutorials['userinscritos']=[]
+            self._tutorials['inscritos']=0
+            return await self.save_list()
+
+    async def _remove_files(self):
+        shutil.rmtree("./json/")
+
+    @commands.command(name="reset-tutorial",brief="reset all tutorials ")
     async def reset(self, ctx):
-        logger.info("Resetando Tutoriais")
-        self._allowtouser=False
-        await self.remove_files()
+        logger.info("Reseting Tutoriais")
+        self._allow_mgs=False
+        await self._remove_files()
         await self.on_ready(True)
-        await logchannel(self.bot,"Resetanto Tutoriais")
+        await logchannel(self._bot,"Reseting Tutoriais")
     
-    @commands.command(name="open",brief="warnig on use that!!")
-    async def open(self, ctx):
-        self._allowtouser=True
+    @commands.command(name="open-tutorial",brief="open dsds on tutorials")
+    async def open_tutorial(self, ctx):
+        self._allow_mgs=True
+        #TO DO To function
         for tutorial in self._tutoriais:
             await self.lista(tutorial)
         await self.show_tutoriais()
         logger.info("Inscrições abertas")
-        await logchannel(self.bot,"Inscrições abertas")
+        await logchannel(self._bot,"Inscrições abertas")
 
+    @commands.command(name="close-tutorial",brief="warnig on use that!!")
+    async def close(self, ctx):
+        self._allow_mgs=False
+        for tutorial in self._tutoriais:
+            await self.lista(tutorial)
+        await self.show_tutoriais()
+        logger.info("Inscrições fechadas")
+        await logchannel(self._bot,"Inscrições fechadas")
 
     @commands.command(name="create-sprints")
     async def create_sprints(self, ctx):
-        self._guild = await self.bot.fetch_guild(config("DISCORD_GUILD_ID"))
-
-        overwrites = {
-        self._guild.default_role: discord.PermissionOverwrite(read_messages=False)}
+        
+        overwrites = {self._guild.default_role: discord.PermissionOverwrite(read_messages=False)}
+        
         organizacao_cat = await get_or_create_channel(
-            "SPRINTS",
+            SPRINTS_CATEGORIES,
             self._guild,
             type=discord.ChannelType.category,
             overwrites=overwrites,
             position=0,
         )
-        
-        x= [{'nome': 'Ana Paula Gomes', 'titulo': 'Análise de dados para cidades', 'repo': 'https://github.com/DadosAbertosDeFeira/', 'publico': 'Intermediário (alguma experiência prévia com um framework, biblioteca ou técnica específica)', 'conhecimento': 'Análise de dados (iniciante), SQL (básico), pandas (iniciante)', 'descrição': 'Vamos utilizar dados abertos para criar análises que sirvam para entender cidades de todo o Brasil.', 'comunidadde': 'O projeto tem o objetivo de desenvolver tecnologias cívicas que sirvam para qualquer cidade de todo o Brasil. A partir da participação nessa sprint, o participante poderá explorar dados da sua cidade e entendê-la melhor. Com sorte, se envolver mais com ela através da programação. :)', 'horarios': 'Sábado - 10h às 13h, Domingo - 10h às 13h'}, {'nome': 'Bruno Messias', 'titulo': 'Helios Network Visualization and Streaming', 'repo': 'https://github.com/fury-gl/helios', 'publico': 'Iniciante (conhecimentos básicos em Python, Orientação a Objetos, Estruturas de Dados, etc.)', 'conhecimento': 'Conhecimento básico sobre grafos e dataviz, conhecimento básico de inglês', 'descrição': 'Esse projeto foi desenvolvido no meu período do google summer of code 2021. Helios é uma ferramente que permite análise de grafos (tais como oriundos de redes sociais) e inspeção visual. Além disso o Helios permite  o compartilhamento da visualização utilizando o protocolo WebRTC.', 'comunidadde': 'O helios sana algumas deficiências dos softwares livres para visualização de grafos. Tais como ser capaz de visualizar grafos com milhões de nós e permitir a interação colaborativa.', 'horarios': 'Sábado - 14h às 17h, Domingo - 15h às 18h'}, {'nome': 'Giulio Carvalho', 'titulo': 'Querido Diário', 'repo': 'https://queridodiario.ok.org.br/', 'publico': 'Intermediário (alguma experiência prévia com um framework, biblioteca ou técnica específica)', 'conhecimento': 'Eu coloquei público intermediário porque contribuições de código necessitam conhecimentos em raspagem de dados, frontend ou api, por exemplo. Como o projeto tem vários repositórios, pessoas que tem conhecimento de frameworks como Scrapy, FastAPI e Angular conseguem contribuir com partes diferentes do projeto (raspadores, API, frontend). Mas também pensamos em fazer muitas melhorias de documentação do projeto, então não seria necessário conhecimento técnico prévio. Se conseguirem passar pras pessoas que qualquer nível é bem vindo, seria ótimo :)', 'descrição': 'O Querido Diário é um projeto para libertar dados de diários oficiais municipais, desde a raspagem dos dados de cada município até a disponibilização do conteúdo processo em formato aberto numa API e numa plataforma de busca. Assim, o projeto tem vários repositórios, cada um dedicado a uma etapa do processo. Com o lançamento oficial da plataforma de busca, queremos dar uma organizada na casa para diminuir as barreiras iniciais de contribuição e também adicionar novas funcionalidades que as pessoas achem legais :) Pensamos inicialmente em melhorar a documentação, melhorar a arquitetura do projeto pra tornar mais fácil de inserir novas funcionalidades, melhorar a interface de uso das usuárias e também construir novos raspadores.', 'comunidadde': 'O projeto tem uma visão clara de libertação de dados onde eles são menos transparentes. Queremos fazer com que informações essenciais de funcionamento de todos os municípios do Brasil estejam acessíveis a qualquer pessoa, técnica ou não, que precisa de uma informação pontual que só está disponível no diário ou que deseja realizar um estudo acadêmico através do conteúdo de anos de diários de várias cidades. Cremos que é possível chegar num ponto onde poderemos utilizar esses dados de forma tão simples que será fácil cruzar informações com outras fontes públicas como as da Receita Federal e do SUS por exemplo. É um projeto de código aberto e muito receptivo a novas contribuições, feito por pessoas muito envolvidas na comunidade e que valorizam demais essa construção colaborativa.', 'horarios': 'Sábado - 10h às 13h, Sábado - 14h às 17h, Domingo - 10h às 13h, Domingo - 15h às 18h'}, {'nome': 'João JS Bueno', 'titulo': 'terminedia', 'repo': 'https://github.com/jsbueno/terminedia', 'publico': 'Iniciante (conhecimentos básicos em Python, Orientação a Objetos, Estruturas de Dados, etc.)', 'conhecimento': 'Python puro, vontade de criar arte na forma de programas ou gostar de jogos vintage', 'descrição': 'O Terminedia é um projeto aberto, sem fins de mercado: é um framework que permite a criação de ASCIIArt ou Unicode Art no terminal, de forma interativa. Ele expõe APIs de desenhos com caracteres, incluindo podendo usar caracteres de bloco  ASCII numa emulação de pixels de alta resolução de texto. Ao longo do desenvolvimento, por não depender de nenhuma lib ou framework externo, ele foi incorporando estruturas de dados e mecanismos que usam a linguagem de forma bastante avançada - por exemplo, decorators que acrescentam parâmetros de cor efundo em um método, de forma transparente, ou subclasses de str para facilitar o uso de emojis. \nHoje o projeto está bastante completo, contando inclusive com widgets de edição de texto e seleção de opções, suporte a mouse, que permitem até o desenvolvimento de apps completas no terminal. \nUm ponto fraco do projeto é a documentação e o fato de que os exemplos existentes (são programas stand-alone instalados junto com o projeto), não cobrem todas as possibilidades existindo no código.\nA sprint pode focar exatamente nos programas de exemplos: tanto evoluir os exemplos existentes para que se tornem aplicativos com utilidade em si mesmos: há o terminedia-plot para plotagem de gráficos no terminal e o terminedia-text para criação de banners de texto usando letras grandes desenhadas com os caracteres de bloco, por exemplo. U  outro é um joguinho de snake que é só uma prova de conceito e pode ser polido até ser um jogo completo, com introdução de fases e níveis de dificuldade. E há funcionalidades inteiras sem exemplos, como os widgets (controles para entrada de texto e seleção), degradês, e os transformers em geral: um mecanismo extremamente poderoso que permite a criação de centenas de efeitos especiais programáticos.', 'comunidadde': 'é um projeto com foco cultural e artístico - então sua contribuição vem na razão direta de existirem usuários usando o mesmo como ferramenta para suas criações. Eventualmente pode ser usado no mercado para enfeitar com efeitos especiais passos feitos no terminal como comandos de git, ou saídas de log e compiladores - da mesma forma que o google cria seus doodles. Outras bibliotecas de Python para o terminal tem um foco mais pragmático tentando ser sérias: o rich foca muito na criação de logs coloridos, e o prompt toolkit foca em permitir a criação de apps de manipulação de dados - a ideia do terminedia é deixar as possibilidades abertas para criação artística. Por exemplo, é possível ter uma área de edição de texto na tela do terminal com escrita na vertical, de baixo pra cima e da esquerda pra direita, com colunas de texto em vez de linhas de texto - e colocar isso numa aplicação', 'horarios': 'Domingo - 10h às 13h, Domingo - 15h às 18h'}, {'nome': 'Pâmella Araújo Balcaçar', 'titulo': 'Rasa Boilerplate', 'repo': 'https://github.com/BOSS-BigOpenSourceSibling/bot-da-boss', 'publico': 'Iniciante (conhecimentos básicos em Python, Orientação a Objetos, Estruturas de Dados, etc.)', 'conhecimento': 'Conhecimentos básicos em Python, sintaxe, e também as tecnologias como RASA, Docker, preferencialmente ambiente linux.', 'descrição': 'O projeto open source Rasa Boilerplate será apresentado junto com conceitos de comunidades open source e o desenvolvimento de chatbots; Entendendo o projeto boilerplate e as tecnologias envolvidas (RASA, Python, Docker);  Conhecerá arquitetura implementada. E por fim, apresentaremos as issues para contribuição.', 'comunidadde': 'Por ser um projeto open source e com parte de sua tecnologia é desenvolvido em python, poderá ser promotor da vivência de contribuição em um projeto assim.', 'horarios': 'Domingo - 15h às 18h'}, {'nome': 'Rafael Ferreira Fontenelle', 'titulo': 'Tradução da documentação do Python', 'repo': 'https://github.com/python/python-docs-pt-br/wiki/Sprint-pybr2021', 'publico': 'Não técnico (isto é, sua atividade não abordará tecnologia diretamente. Ex: Tradução da documentação)', 'conhecimento': 'Inglês', 'descrição': 'Esta sprint busca juntar atuais e potenciais membros da equipe de tradução da documentação do Python em uma frente de ataque às mensagens não traduzidas.', 'comunidadde': 'Incentivar novos membros a participar da tradução da documentação, bem como aumentar o número de mensagens traduzidas.', 'horarios': 'Sábado - 14h às 17h, Domingo - 10h às 13h, Domingo - 15h às 18h'}]
 
-        self.channel = await get_or_create_channel(f"sprints-info", self._guild, position=0, category=organizacao_cat)
+        self._sprint_channel = await get_or_create_channel(f"sprints-info", self._guild, position=0, category=organizacao_cat)
         
         full_msg = []
         for index,sprint in enumerate(self.sprints_json):
@@ -183,7 +240,7 @@ class Tutorial(commands.Cog):
             data = f"{tutorial['nome']} - {canal} - {datetime.strptime(tutorial['data_hora'],'%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y %H:%M')}"
             insc=[]
             for inscritos in tutorial.get("userinscritos"):
-                inscrito = discord.utils.get(self.bot.get_all_members(), id=inscritos)
+                inscrito = discord.utils.get(self._bot.get_all_members(), id=inscritos)
                 if inscrito:
                     insc.append(f"{inscrito.name} - <@{inscrito.id}>")
                     #await logchannel(self.bot,f"======   {inscrito.name} - <@{inscrito.id}>")
@@ -195,24 +252,10 @@ class Tutorial(commands.Cog):
             json.dump(out, f)
 
 
-    @commands.command(name="close",brief="warnig on use that!!")
-    async def close(self, ctx):
-        self._allowtouser=False
-       
+    @commands.command(name="create-tutoriais",brief="create tutorias structures")
+    async def create_tutoriai(self,force_clean=False):
+        logger.info("Creating tutorials structures")
         
-        for index,tutorial in enumerate(self._tutoriais):
-            for tutorial in self._tutoriais:
-                await self.lista(tutorial)
-            await self.show_tutoriais()
-            logger.info("Inscrições fechadas")
-            await logchannel(self.bot,"Inscrições fechadas")
-
-    @commands.Cog.listener()
-    async def on_ready(self,force_clean=False):
-        logger.info("Criando Canais")
-
-        self._guild = await self.bot.fetch_guild(config("DISCORD_GUILD_ID"))
-
         overwrites = {
         self._guild.default_role: discord.PermissionOverwrite(read_messages=False)}
         organizacao_cat = await get_or_create_channel(
@@ -266,7 +309,7 @@ class Tutorial(commands.Cog):
         msg+="\n:exclamation::exclamation: AQUI ESTÃO OS TUTORIAIS DA PYTHON BRASIL 2021 :exclamation::exclamation:"
         msg+="\n:exclamation::exclamation: MAIS INFORMAÇÕES CLICANDO NO LINK DE CADA CANAL :exclamation::exclamation:"
         msg+="\n:exclamation::exclamation: APENAS 1 INSCRIÇÃO POR PESSOA NO MESMO HORÁRIO (SERÃO VALIDADAS PELO ORG!!) :exclamation::exclamation:"
-        msg+="\n:red_circle: INSCRIÇÕES FECHADAS :red_circle:\n\n\n" if not self._allowtouser else "\n:green_circle: INSCRIÇÕES ABERTAS :green_circle:\n\n\n"
+        msg+="\n:red_circle: INSCRIÇÕES FECHADAS :red_circle:\n\n\n" if not self._allow_mgs else "\n:green_circle: INSCRIÇÕES ABERTAS :green_circle:\n\n\n"
         msg+=""
         await self.channel.send(msg)
 
@@ -306,7 +349,7 @@ class Tutorial(commands.Cog):
                         await self.lista(tutorial)
                         return  
 
-                    if not self._allowtouser:
+                    if not self._allow_mgs:
                         #await message.delete()
                         await message.channel.send(":red_circle: INSCRIÇÕES FECHADAS :red_circle:")
                         return
@@ -339,7 +382,7 @@ class Tutorial(commands.Cog):
         channel = self.bot.get_channel(tutorial["channel"])
 
         msg=""
-        msg+=":red_circle: INSCRIÇÕES FECHADAS :red_circle:" if not self._allowtouser else ":green_circle: INSCRIÇÕES ABERTAS :green_circle:\n:keyboard: DIGITE a palavra 'entrar' para sua inscrição ou 'sair' para remover sua inscrição :keyboard:"
+        msg+=":red_circle: INSCRIÇÕES FECHADAS :red_circle:" if not self._allow_mgs else ":green_circle: INSCRIÇÕES ABERTAS :green_circle:\n:keyboard: DIGITE a palavra 'entrar' para sua inscrição ou 'sair' para remover sua inscrição :keyboard:"
         msg+= f"\n:diamond_shape_with_a_dot_inside: {MSG.format(channel=tutorial['nome'])}"
         msg+= f"\n:calendar: Dia e Hora: {datetime.strptime(tutorial['data_hora'],'%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y %H:%M')}"  
         for ministrante in tutorial['ministrantes']:

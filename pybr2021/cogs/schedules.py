@@ -11,9 +11,11 @@ from discord.ext import commands, tasks
 from loguru import logger
 from pytz import timezone
 
-CALENDAR_URL='https://www.googleapis.com/calendar/v3/calendars/7siodq5un9gqbqd4mmgf2poiqs@group.calendar.google.com/events?key=AIzaSyAIn8DyZFtthupLozgwIX3NUURFMWEIPb4&timeMin=2021-10-11T00:00:00.000Z&timeMax=2021-10-18T00:00:00.000Z&singleEvents=true&maxResults=9999&timeZone=UTC'
-CALENDER_TIMEZONE= 'UTC'
-SHOW_TIMEZONE='America/Sao_Paulo'
+CALENDAR_URL = config("CALENDAR_URL")
+CALENDER_TIMEZONE= config('CALENDER_TIMEZONE','UTC')
+DISPPLAY_TIMEZONE= config('DISPPLAY_TIMEZONE','UTC')
+
+
 DISCORD_MSG_CHANNEL_ID = config("DISCORD_MSG_CHANNEL_ID","859819206584959007") # Python Brasil 2021 > Geral
 
 START_TIME={"hour":8,"minute":00}
@@ -177,8 +179,8 @@ class Schedules(commands.Cog):
             "day":now.day,
             **END_TIME,
         }
-        self.start_date = datetime(**start_date).replace(tzinfo=timezone(SHOW_TIMEZONE))
-        self.end_date = datetime(**end_date).replace(tzinfo=timezone(SHOW_TIMEZONE))
+        self.start_date = datetime(**start_date).replace(tzinfo=timezone(DISPPLAY_TIMEZONE))
+        self.end_date = datetime(**end_date).replace(tzinfo=timezone(DISPPLAY_TIMEZONE))
         self.start_date_utc = datetime(**start_date).astimezone(tz=timezone('UTC'))
         self.end_date_utc = datetime(**end_date).astimezone(tz=timezone('UTC'))
         logger.info(f"Start Date: UTC:{self.start_date_utc.strftime(DATE_FMT)} -- Local:{self.start_date}")
