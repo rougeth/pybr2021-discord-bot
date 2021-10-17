@@ -11,7 +11,7 @@ from decouple import config
 from discord import message
 from discord.enums import ChannelType
 from discord.ext import commands, tasks
-from discord_setup import get_or_create_channel
+from discord_setup import get_or_create_channel, get_or_create_role
 from invite_tracker import InviteTracker
 from loguru import logger
 
@@ -171,28 +171,40 @@ class Tutorial(commands.Cog):
     async def tutorial_users(self, ctx):
         logger.info("full_msg")
 
-        self._tutoriais = TUTORIAIS
-        out=[]
-        for index,tutorial in enumerate(self._tutoriais):
-            tutorial["file_name"]=f"tutorial_{index}_file.json"
-            tutorial_ =await self.load_list(tutorial)
-            tutorial_["data_hora"] =  tutorial["data_hora"]
-            tutorial = tutorial_    
-            channel = self.bot.get_channel(tutorial["channel"])
-            canal =  f"<#{channel.id}>" if channel else ''
-            data = f"{tutorial['nome']} - {canal} - {datetime.strptime(tutorial['data_hora'],'%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y %H:%M')}"
-            insc=[]
-            for inscritos in tutorial.get("userinscritos"):
-                inscrito = discord.utils.get(self.bot.get_all_members(), id=inscritos)
-                if inscrito:
-                    insc.append(f"{inscrito.name} - <@{inscrito.id}>")
-                    #await logchannel(self.bot,f"======   {inscrito.name} - <@{inscrito.id}>")
-            out.append(dict(data=data,inscritos=insc))
+        # self._tutoriais = TUTORIAIS
+        # out=[]
+        # for index,tutorial in enumerate(self._tutoriais):
+        #     tutorial["file_name"]=f"tutorial_{index}_file.json"
+        #     tutorial_ =await self.load_list(tutorial)
+        #     tutorial_["data_hora"] =  tutorial["data_hora"]
+        #     tutorial = tutorial_    
+        #     channel = self.bot.get_channel(tutorial["channel"])
+
+        #     self._guild = await self.bot.fetch_guild(config("DISCORD_GUILD_ID"))
+    
+        #     try:
+        #         role = get_or_create_role(channel.name,self._guild ,None)
+        #     except:
+        #         role = None
+
+        #     canal =  f"<#{channel.id}>" if channel else ''
+        #     data = f"{tutorial['nome']} - {canal} - {datetime.strptime(tutorial['data_hora'],'%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y %H:%M')}"
+        #     insc=[]
+        #     for inscritos in tutorial.get("userinscritos"):
+        #         inscrito = discord.utils.get(self.bot.get_all_members(), id=inscritos)
+        #         if inscrito:
+        #             insc.append(f"{inscrito.name} - <@{inscrito.id}>")
+        #             #await logchannel(self.bot,f"======   {inscrito.name} - <@{inscrito.id}>")
+        #     out.append(dict(data=data,inscritos=insc))
         
-        logger.info(out)
-        os.makedirs("./json",exist_ok=True)
-        with open(f"./json/inscritos.json", 'w') as f:
-            json.dump(out, f)
+        # logger.info(out)
+        # os.makedirs("./json",exist_ok=True)
+        # with open(f"./json/inscritos.json", 'w') as f:
+        #     json.dump(out, f)
+
+        for member in self.bot.get_all_members():
+            for role in member.roles:
+                logger.info(role.name)
 
 
     @commands.command(name="close",brief="warnig on use that!!")
@@ -254,7 +266,7 @@ class Tutorial(commands.Cog):
 
             self._tutoriais[index] = tutorial
 
-        await self.show_tutoriais()
+        #await self.show_tutoriais()
         logger.info("Canais criados com sucesso")
         self.check_messages=True
         await logchannel(self.bot,"Canais criados com sucesso")
@@ -286,7 +298,7 @@ class Tutorial(commands.Cog):
         for msg in messages:
             await msg.delete()
 
-    @commands.Cog.listener()
+    #@commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         logger.info("Validando mensagem")
         if message.author.bot or message.channel.type == discord.ChannelType.private:
