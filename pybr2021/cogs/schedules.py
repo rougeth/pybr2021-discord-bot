@@ -31,11 +31,11 @@ class Schedules(commands.Cog):
         self.alerts_type=["talk","closing","keynote","panel","light"]
         self._first_loop=True
         self.parse_start_end() #todo async
-        self.load_events.start()
-        self.next_events.start()
-        self.boteco_loop.start()
-        self.hello_loop.start()
-        self.first_loop.start()
+       #self.load_events.start()
+        #self.next_events.start()
+        #self.boteco_loop.start()
+        #self.hello_loop.start()
+        #self.first_loop.start()
      
 
     @tasks.loop(minutes=30)
