@@ -14,7 +14,7 @@ from decouple import config
 from discord import message
 from discord.enums import ChannelType
 from discord.ext import commands, tasks
-from discord_setup import get_or_create_channel
+from discord_setup import get_or_create_channel, get_or_create_role
 from invite_tracker import InviteTracker
 from loguru import logger
 from pytz import timezone
@@ -69,8 +69,8 @@ TUTORIAIS = [
 ]
 
 class Tutorial(commands.Cog):
-    SPRINTS_FILE_PATH = config("SPRINTS_FILE_PATH",'./files')
-    TUTORIALS_FILE_PATH = config("TUTORIALS_FILE_PATHS",'./files')
+    TUTORIALS_FILE_CONTROL = config("TUTORIALS_FILE_CONTROL",'./files/tutorial.json')
+    #TUTORIALS_FILE_PATH = config("TUTORIALS_FILE_PATHS",'./files')
 
     #TO DO SPRINT AND TUTORIALS ROLES
     #ATTENDEES_ROLE_NAME = "Participantes"
@@ -83,11 +83,13 @@ class Tutorial(commands.Cog):
         self.alerts_type = ['tutorial','sprint']
         #self.message = None
         self.check_messages = False
-        self.sprints_json = self.load_sprints()
+        #self.sprints_json = self.load_sprints()
+        self._events = None
         self._allow_mgs= False
         self._tutorials = []
         self._sprints=[]
         self.index = {}
+        self.load_events()
 
     async def get_guild(self):
         if not self._guild:
@@ -117,6 +119,7 @@ class Tutorial(commands.Cog):
             if item.get('extendedProperties').get('private').get('type') in self.alerts_type:
                 events.append(
                     {
+                        'id':item.get('start').get('id'),
                         'start': datetime.strptime(item.get('start').get('dateTime'),'%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=timezone(CALENDER_TIMEZONE)),
                         'timezone':item.get('start').get('timeZone'),
                         'location':item.get('location'),
@@ -136,27 +139,27 @@ class Tutorial(commands.Cog):
             index[event["start"].date()].append(event)
 
     def load_sprints(self):
-        if self.SPRINTS_FILE_PATH:
-            return json.loads(open(self.SPRINTS_FILE_PATH, "r").read()) 
+        if self.TUTORIALS_FILE_CONTROL:
+            return json.loads(open(self.TUTORIALS_FILE_CONTROL, "r").read()) 
         return None
 
     async def _save_files(self):
         os.makedirs("./json",exist_ok=True)
-        with open(f"./json/{self._tutorials['file_name']}", 'w') as f:
+        with open(f"./json/{self.TUTORIALS_FILE_CONTROL}", 'w') as f:
             json.dump(object, f)
         return object
 
-    async def _save_files(self):
-        if os.path.isfile(f"./json/{self._tutorials['file_name']}"):
-            with open(f"./json/{self._tutorials['file_name']}", 'rb') as f:
+    async def _load_files(self):
+        if os.path.isfile(f"./json/{self.TUTORIALS_FILE_CONTROL}"):
+            with open(f"./json/{self.TUTORIALS_FILE_CONTROL}", 'rb') as f:
                 return json.load(f)
         else:
-            self._tutorials['userinscritos']=[]
-            self._tutorials['inscritos']=0
-            return await self.save_list()
+            self._tutorials['enrolled_member_id']=[]
+            self._tutorials['enrolled_number']=0
+            return await self._save_list()
 
     async def _remove_files(self):
-        shutil.rmtree("./json/")
+        shutil.rmtree(self.TUTORIALS_FILE_CONTROL)
 
     @commands.command(name="reset-tutorial",brief="reset all tutorials ")
     async def reset(self, ctx):
@@ -259,7 +262,7 @@ class Tutorial(commands.Cog):
         overwrites = {
         self._guild.default_role: discord.PermissionOverwrite(read_messages=False)}
         organizacao_cat = await get_or_create_channel(
-            "TUTORIAIS",
+            "TUTORIAIS-TEST",
             self._guild,
             type=discord.ChannelType.category,
             overwrites=overwrites,
@@ -278,28 +281,30 @@ class Tutorial(commands.Cog):
         self.channel = await get_or_create_channel(f"tutorial-info", self._guild, position=0, category=organizacao_cat)
         self.voice=  await get_or_create_channel(f"tutorial-ajuda", self._guild, position=0, category=organizacao_cat,type=discord.ChannelType.voice)
 
-        self._tutoriais = TUTORIAIS
+        self._tutoriais = TUTORIAIS[:2]
+        
 
-        for index,tutorial in enumerate(self._tutoriais):
-            tutorial["file_name"]=f"tutorial_{index}_file.json"
-            tutorial_ =await self.load_list(tutorial)
-            tutorial_["data_hora"] =  tutorial["data_hora"]
-            tutorial = tutorial_
+        for index,tutorial in enumerate(self._tutoriais)
             await logchannel(self.bot, f"Carregando tutorial-{index}:{tutorial.get('nome')[:20]}")
-            channel = await get_or_create_channel(f"tutorial-{index}-chat", self._guild, position=99, category=organizacao_cat)
-            voice=  await get_or_create_channel(f"tutorial-{index}-voice", self._guild, position=99, category=organizacao_cat,type=discord.ChannelType.voice)
+            channel = await get_or_create_channel(f"tutorial-{index}-chat-test", self._guild, position=99, category=organizacao_cat)
+            voice=  await get_or_create_channel(f"tutorial-{index}-voice-test", self._guild, position=99, category=organizacao_cat,type=discord.ChannelType.voice)
+            try:
+                role = await get_or_create_role(f"tutorial-{index}", self._guild, permissions=None)
+            except:
+                role=None
             tutorial["channel"] = int(channel.id)
             tutorial["voice"] = int(voice.id)
-            #await self.clear(tutorial["channel"])
+            tutorial["role"] = int(role.id)
             logger.info(tutorial)
             msg= await self.lista(tutorial,True)
             tutorial["inscritos_msg"] = int(msg.id)
 
             self._tutoriais[index] = tutorial
+            logger.info(f"Canais criados com sucesso {channel.name} {voice.name}")
 
         await self.show_tutoriais()
         logger.info("Canais criados com sucesso")
-        self.check_messages=True
+        #self.check_messages=True
         await logchannel(self.bot,"Canais criados com sucesso")
 
     async def show_tutoriais(self):
@@ -329,7 +334,7 @@ class Tutorial(commands.Cog):
         for msg in messages:
             await msg.delete()
 
-    @commands.Cog.listener()
+    #@commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         logger.info("Validando mensagem")
         if message.author.bot or message.channel.type == discord.ChannelType.private:
