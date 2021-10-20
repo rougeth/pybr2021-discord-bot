@@ -223,7 +223,7 @@ class Tutorial(commands.Cog):
             logger.info("Inscrições fechadas")
             await logchannel(self.bot,"Inscrições fechadas")
 
-    @commands.Cog.listener()
+    #@commands.Cog.listener()
     async def on_ready(self,force_clean=False):
         logger.info("Criando Canais")
 
