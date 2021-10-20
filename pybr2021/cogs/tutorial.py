@@ -169,7 +169,7 @@ class Tutorial(commands.Cog):
 
     @commands.command(name="tutorial-users")
     async def tutorial_users(self, ctx):
-        logger.info("full_msg")
+        logger.info("gerando lista de inscritos")
 
         self._tutoriais = TUTORIAIS
         out=[]
@@ -204,10 +204,11 @@ class Tutorial(commands.Cog):
             insc = list(dict.fromkeys(insc))
             out.append(dict(data=data,inscritos=insc))
         
-        logger.info(out)
+        logger.info("salvando em disco")
         os.makedirs("./json",exist_ok=True)
         with open(f"./json/inscritos.json", 'w') as f:
             json.dump(out, f)
+        logger.info("lista salva")
 
         
 
