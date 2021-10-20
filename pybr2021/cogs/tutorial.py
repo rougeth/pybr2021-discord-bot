@@ -44,29 +44,7 @@ SPRINTS_CATEGORIES= config('SPRINTS_CATEGORIES','SPRINTS')
 
 MSG="""Tutorial {channel}"""
 
-TUTORIAIS = [
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Desenhando com Python: programação criativa ao alcance de todas as pessoas", "data_hora":"2021-10-17 10:00:00", "vagas": "25", "ministrantes": ["Alexandre Villares"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Análise de Datasets Científicos usando Python", "data_hora":"2021-10-16 10:00:00", "vagas": "100", "ministrantes": ["Bruno dos Santos Almeida"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "1-Djavue - criando uma aplicação web do zero com Django e Vue.js", "data_hora":"2021-10-16 10:00:00", "vagas": "80", "ministrantes": ["Buser (facilitadora: Renzo Nuccitelli)"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "2-Djavue - criando uma aplicação web do zero com Django e Vue.js", "data_hora":"2021-10-16 15:00:00", "vagas": "80", "ministrantes": ["Buser (facilitadora: Renzo Nuccitelli)"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Desenvolvimento orientado a testes com Django", "data_hora":"2021-10-17 15:00:00", "vagas": "20", "ministrantes": ["Carta (facilitador: Gabriel Saldanha)"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Como o dinheiro viaja internacionalmente?", "data_hora":"2021-10-16 10:00:00", "vagas": "80", "ministrantes": ["Ebury (facilitador: Gustavo Di Domenico)"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Acelerando a exploração de dados multidimensionais com Xarray", "data_hora":"2021-10-17 15:00:00", "vagas": "60", "ministrantes": ["Felipe Schuc:00:00"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Python para microcontroladores com MicroPython", "data_hora":"2021-10-17 10:00:00", "vagas": "10", "ministrantes": ["Gabriel Aragão"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Python Geoespacial: automatizando processos de GIS e Sensoriamento Remoto com pacotes abertos em python", "data_hora":"2021-10-17 15:00:00", "vagas": "15", "ministrantes": ["Guilherme Iablonovski"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Viajando por uma API protegida: Implementando uma API com Flask", "data_hora":"2021-10-16 10:00:00", "vagas": "30", "ministrantes": ["Jessica Temporal"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Expectativas nem sempre machucam - Criando expectativas para os seus dados com Great Expectations.", "data_hora":"2021-10-16 15:00:00", "vagas": "20", "ministrantes": ["Joamila Brito"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Analisando 250GB em segundos usando Python e a Base dos Dados", "data_hora":"2021-10-16 10:00:00", "vagas": "10", "ministrantes": ["João Carabetta"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Criando um jogo de plataforma com Pygame do zero", "data_hora":"2021-10-16 10:00:00", "vagas": "12", "ministrantes": ["João JS Bueno"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Python para Dashboards", "data_hora":"2021-10-17 15:00:00", "vagas": "30", "ministrantes": ["Jose Edivaldo da Silva Junior"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Airflow na Pratica", "data_hora":"2021-10-16 10:00:00", "vagas": "40", "ministrantes": ["JusBrasil (facilitador: Tarsis)"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Anatomia de um interpretador Lisp em Python", "data_hora": "2011-10-16 15:00:00", "vagas": "30", "ministrantes": ["Luciano Ramalho"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Construindo API's robustas utilizando Python", "data_hora":"2021-10-16 15:00:00", "vagas": "30", "ministrantes": ["Luizalabs (facilitador: Cassio Botaro)"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "As luas de Jupyter: widgets e outras ferramentas que o orbitam", "data_hora":"2021-10-17 10:00:00", "vagas": "20", "ministrantes": ["Mariana Meireles", "Marcos Pantuza", "Laysa Ucho"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Qual produto é o melhor para mim? Comparando produtos usando a API de MELI", "data_hora":"2021-10-17 10:00:00", "vagas": "15", "ministrantes": ["Mercado Livre (facilitador: Giovanni Almeida)"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Desvendando o código genético com Biopython", "data_hora":"2021-10-17 10:00:00", "vagas": "30", "ministrantes": ["Pâmella Araújo Balcaçar"]},
-    {"channel":None,"voice":None,"userinscritos":[],"inscritos":0,"nome": "Manipulando Imagens da webCam com python", "data_hora":"2021-10-17 15:00:00", "vagas": "40", "ministrantes": ["Ramon Domingos Duarte Oliveira"]},
-]
+TUTORIAIS = [{'id': None, 'start': datetime.datetime(2021, 10, 16, 13, 0, tzinfo="UTC"), 'timezone': 'America/Sao_Paulo', 'location': 'Tutorial', 'title': 'Viajando por uma API protegida: Implementando uma API com Flask', 'author': 'Jessica Temporal', 'discord_channel': '', 'type': 'tutorial', 'youtube_channel': '', 'seats_limits': 10}, {'id': None, 'start': datetime.datetime(2021, 10, 17, 18, 0, tzinfo="UTC"), 'timezone': 'America/Sao_Paulo', 'location': 'Tutorial', 'title': 'Python Geoespacial: automatizando processos de GIS e Sensoriamento Remoto com pacotes abertos em python', 'author': 'Guilherme Iablonovski', 'discord_channel': '', 'type': 'tutorial', 'youtube_channel': '', 'seats_limits': 10}]
 
 class Tutorial(commands.Cog):
     TUTORIALS_FILE_CONTROL = config("TUTORIALS_FILE_CONTROL",'./files/tutorial.json')
@@ -89,7 +67,6 @@ class Tutorial(commands.Cog):
         self._tutorials = []
         self._sprints=[]
         self.index = {}
-        self.load_events()
 
     async def get_guild(self):
         if not self._guild:
@@ -99,7 +76,9 @@ class Tutorial(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         logger.info("Tutorias module has started")
-        await self.get_guild()
+        await self.load_events()
+        #logger.info(self._tutorials[:2])
+        #await self.get_guild()
 
     async def load_events(self):
         logger.info("Loading calendar events.")
@@ -109,10 +88,21 @@ class Tutorial(commands.Cog):
             response = await self.http_get_json(semaphore, client, url)
 
         logger.info("Parsing events")
-        self._events = await self.parse_events(response)
-        self.index = self.create_index(self._events)
+        self._tutorials = await self.parse_events(response)
+        self.index = self.create_index(self._tutorials)
         logger.info("Calendar finished load")
 
+    async def http_get_json(self,semaphore, client, url, retry=3):
+        async with semaphore:
+            try:
+                response = await client.get(url)
+                return response.json()
+            except httpx.ReadTimeout:
+                if retry > 0:
+                    await asyncio.sleep(5)
+                    return await self.http_get_json(semaphore, client, url, retry - 1)
+                logger.exception("Erro")
+            
     async def parse_events(self,response):
         events=[]
         for item in response.get("items"):
@@ -238,7 +228,7 @@ class Tutorial(commands.Cog):
             tutorial_ =await self.load_list(tutorial)
             tutorial_["data_hora"] =  tutorial["data_hora"]
             tutorial = tutorial_    
-            channel = self.bot.get_channel(tutorial["channel"])
+            channel = self._bot.get_channel(tutorial["channel"])
             canal =  f"<#{channel.id}>" if channel else ''
             data = f"{tutorial['nome']} - {canal} - {datetime.strptime(tutorial['data_hora'],'%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y %H:%M')}"
             insc=[]
@@ -246,7 +236,7 @@ class Tutorial(commands.Cog):
                 inscrito = discord.utils.get(self._bot.get_all_members(), id=inscritos)
                 if inscrito:
                     insc.append(f"{inscrito.name} - <@{inscrito.id}>")
-                    #await logchannel(self.bot,f"======   {inscrito.name} - <@{inscrito.id}>")
+                    #await logchannel(self._bot,f"======   {inscrito.name} - <@{inscrito.id}>")
             out.append(dict(data=data,inscritos=insc))
         
         logger.info(out)
@@ -271,7 +261,7 @@ class Tutorial(commands.Cog):
 
         if force_clean:
             pass
-            # for guilds in self.bot.guilds:
+            # for guilds in self._bot.guilds:
             #     for cat in guilds.categories:
             #         if cat.name == "TUTORIAIS-TESTES":
             #             for c  in cat.channels:
@@ -281,20 +271,17 @@ class Tutorial(commands.Cog):
         self.channel = await get_or_create_channel(f"tutorial-info", self._guild, position=0, category=organizacao_cat)
         self.voice=  await get_or_create_channel(f"tutorial-ajuda", self._guild, position=0, category=organizacao_cat,type=discord.ChannelType.voice)
 
-        self._tutoriais = TUTORIAIS[:2]
+        self._tutoriais = TUTORIAIS
         
 
-        for index,tutorial in enumerate(self._tutoriais)
-            await logchannel(self.bot, f"Carregando tutorial-{index}:{tutorial.get('nome')[:20]}")
+        for index,tutorial in enumerate(self._tutoriais):
+            await logchannel(self._bot, f"Carregando tutorial-{index}:{tutorial.get('nome')[:20]}")
             channel = await get_or_create_channel(f"tutorial-{index}-chat-test", self._guild, position=99, category=organizacao_cat)
             voice=  await get_or_create_channel(f"tutorial-{index}-voice-test", self._guild, position=99, category=organizacao_cat,type=discord.ChannelType.voice)
-            try:
-                role = await get_or_create_role(f"tutorial-{index}", self._guild, permissions=None)
-            except:
-                role=None
+            role = await get_or_create_role(f"tutorial-{index}-role-test", self._guild, permissions=discord.Permissions.none())
             tutorial["channel"] = int(channel.id)
             tutorial["voice"] = int(voice.id)
-            tutorial["role"] = int(role.id)
+            tutorial["role"] = int(role.id) 
             logger.info(tutorial)
             msg= await self.lista(tutorial,True)
             tutorial["inscritos_msg"] = int(msg.id)
@@ -305,7 +292,7 @@ class Tutorial(commands.Cog):
         await self.show_tutoriais()
         logger.info("Canais criados com sucesso")
         #self.check_messages=True
-        await logchannel(self.bot,"Canais criados com sucesso")
+        await logchannel(self._bot,"Canais criados com sucesso")
 
     async def show_tutoriais(self):
 
@@ -320,7 +307,7 @@ class Tutorial(commands.Cog):
 
         tutorias_msg=":diamond_shape_with_a_dot_inside: {nome}\n     :writing_hand_tone4: <#{canal}> :calendar: {data}"
         for tutorial  in self._tutoriais:
-            canal = self.bot.get_channel(tutorial["channel"])
+            canal = self._bot.get_channel(tutorial["channel"])
             nome = tutorial["nome"]
             i= tutorial['inscritos']
             total = tutorial['vagas']
@@ -329,7 +316,7 @@ class Tutorial(commands.Cog):
 
 
     async def clear(self,channel):
-        channel_msg = self.bot.get_channel(channel)
+        channel_msg = self._bot.get_channel(channel)
         messages = await channel_msg.history().flatten()
         for msg in messages:
             await msg.delete()
@@ -342,7 +329,7 @@ class Tutorial(commands.Cog):
         if not self.check_messages:
             return
         for index,tutorial in enumerate(self._tutoriais):
-            channel = self.bot.get_channel(tutorial["channel"])
+            channel = self._bot.get_channel(tutorial["channel"])
             # if channel is None:
             #     continue
             if message.channel.id == channel.id:
@@ -360,7 +347,7 @@ class Tutorial(commands.Cog):
                         return
 
                     logger.info(f"Cadastrando usuário {message.author.name}")
-                    await logchannel(self.bot,f"Cadastrando usuário {message.author.name} em {tutorial['nome']}")
+                    await logchannel(self._bot,f"Cadastrando usuário {message.author.name} em {tutorial['nome']}")
                     tutorial['inscritos']+=1
                     tutorial["userinscritos"].append(message.author.id)
                     logger.info(tutorial)
@@ -372,7 +359,7 @@ class Tutorial(commands.Cog):
                 
                     if message.author.id in tutorial["userinscritos"]:
                         logger.info(f"Removendo usuário {message.author.name}")
-                        await logchannel(self.bot,f"Removendo usuário {message.author.name} em {tutorial['nome']}")
+                        await logchannel(self._bot,f"Removendo usuário {message.author.name} em {tutorial['nome']}")
                         tutorial['inscritos']-=1
                         tutorial["userinscritos"].remove(message.author.id)
                         await self.save_list(tutorial)
@@ -384,7 +371,7 @@ class Tutorial(commands.Cog):
                 #await self.show_tutoriais()
 
     async def lista(self,tutorial,init=False):
-        channel = self.bot.get_channel(tutorial["channel"])
+        channel = self._bot.get_channel(tutorial["channel"])
 
         msg=""
         msg+=":red_circle: INSCRIÇÕES FECHADAS :red_circle:" if not self._allow_mgs else ":green_circle: INSCRIÇÕES ABERTAS :green_circle:\n:keyboard: DIGITE a palavra 'entrar' para sua inscrição ou 'sair' para remover sua inscrição :keyboard:"
